@@ -1,10 +1,22 @@
+import java.util.ArrayList;
 import java.util.List;
 
 public class Database {
     private List<Table> tables;
     private String name;
 
-    public void addTable(Table table) throws TableNotFound, TableAlreadyExists{}
+    public Database(String _name){
+        name = _name;
+        tables = new ArrayList<>();
+    }
+
+    public void addTable(Table _table) throws TableAlreadyExists{
+        for(Table table : tables){
+            if(table.getName().equals(_table.getName())){
+                throw new TableAlreadyExists();
+            }
+        }
+    }
     public void removeTable(String tableName) throws TableNotFound{
         Table tableToDelete = null;
         for(Table table : tables){
