@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Table {
     private String name;
@@ -14,6 +15,22 @@ public class Table {
 
     private Table select(List<String>, whichColumns) {
 
+    }
+
+    private boolean insert(Record record){
+
+    }
+
+    private boolean delete(Condition condition){
+
+    }
+
+    private update(Condition condition, Map<columnName,newValue>){
+
+    }
+
+    private insert(List<Record>);{
+        
     }
 
 
