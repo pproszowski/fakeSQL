@@ -9,11 +9,11 @@ public class Storage {
         name = _name;
     }
 
-    private boolean addTable(Table table){
+    private boolean addDatabase(Database database){
         return true;
     }
 
-    private boolean deleteTable(String whichTable){
+    private boolean deleteDatabase(String whichDatabase){
         return true;
     }
 
