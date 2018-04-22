@@ -16,6 +16,7 @@ public class Database {
                 throw new TableAlreadyExists();
             }
         }
+        tables.add(_table);
     }
     public void removeTable(String tableName) throws TableNotFound{
         Table tableToDelete = null;
