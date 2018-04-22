@@ -30,7 +30,7 @@ public class Table {
     }
 
     private insert(List<Record>);{
-        
+
     }
 
 
