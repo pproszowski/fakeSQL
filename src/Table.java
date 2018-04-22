@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Table {
     private String name;
@@ -27,11 +28,11 @@ public class Table {
         return false;
     }
 
-    public boolean update(Condition condition, Map<String columnName, Tuple newValue>){
+    public boolean update(Condition condition, Map<String, Tuple> newValues){
         return false;
     }
 
-    public boolean insert(List<Record>){
+    public boolean insert(List<Record> records){
         return false;
     }
 
