@@ -1,4 +1,4 @@
-public class TableAlreadyExists extends Exception {
+public class TableAlreadyExistsException extends Exception {
     @Override
     public String getMessage() {
         return "Table already exists!";

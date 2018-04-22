@@ -9,11 +9,14 @@ public class Storage {
         name = _name;
     }
 
-    private boolean addDatabase(Database database){
+
+    // function are protected only because of first tests, in further version they'll change to private
+
+    protected boolean addDatabase(Database database) throws DatabaseAlreadyExistsException {
         return true;
     }
 
-    private boolean deleteDatabase(String whichDatabase){
+    protected boolean deleteDatabase(String whichDatabase) throws DatabaseNotFoundException{
         return true;
     }
 
@@ -21,7 +24,7 @@ public class Storage {
         return new Response();
     }
 
-    public int howManyDatabases(){
+    protected int howManyDatabases(){
         return databases.size();
     }
 

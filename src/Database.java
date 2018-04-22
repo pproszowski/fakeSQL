@@ -10,15 +10,15 @@ public class Database {
         tables = new ArrayList<>();
     }
 
-    public void addTable(Table _table) throws TableAlreadyExists{
+    public void addTable(Table _table) throws TableAlreadyExistsException {
         for(Table table : tables){
             if(table.getName().equals(_table.getName())){
-                throw new TableAlreadyExists();
+                throw new TableAlreadyExistsException();
             }
         }
         tables.add(_table);
     }
-    public void removeTable(String tableName) throws TableNotFound{
+    public void removeTable(String tableName) throws TableNotFoundException {
         Table tableToDelete = null;
         for(Table table : tables){
             if(table.getName().equals(tableName)){
@@ -29,17 +29,17 @@ public class Database {
         if(tableToDelete != null){
             tables.remove(tableToDelete);
         }else{
-            throw new TableNotFound();
+            throw new TableNotFoundException();
         }
     }
-    public Table getTable(String tableName) throws TableNotFound{
+    public Table getTable(String tableName) throws TableNotFoundException {
         for(Table table : tables){
             if(table.getName().equals(tableName)){
                 return table;
             }
         }
 
-        throw new TableNotFound();
+        throw new TableNotFoundException();
     }
     public int howManyTables(){
         return tables.size();

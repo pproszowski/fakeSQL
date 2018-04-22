@@ -4,9 +4,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class DatabaseTest {
     Database database = new Database("test");
-    Table table = new Table("testTable");
-    Table anotherTable = new Table("testTable");
-    Table anotherTable2 = new Table("testTable2");
+    Table table = new Table("testTable1");
+    Table anotherTable = new Table("testTable2");
+    Table anotherTable2 = new Table("testTable3");
 
     @Test
     void addingTableToDatabaseShouldIncreaseAmountOfTables(){
@@ -18,7 +18,7 @@ class DatabaseTest {
             assertEquals(2, database.howManyTables());
             database.addTable(anotherTable2);
             assertEquals(3, database.howManyTables());
-        }catch (TableAlreadyExists e){
+        }catch (TableAlreadyExistsException e){
             System.out.println(e.getMessage());
         }
     }
@@ -29,7 +29,7 @@ class DatabaseTest {
             database.addTable(table);
             database.addTable(table);
             fail("Exception should be thrown but wasn't");
-        } catch (TableAlreadyExists e) {
+        } catch (TableAlreadyExistsException e) {
             System.out.println(e.getMessage());
         }
     }
@@ -39,7 +39,7 @@ class DatabaseTest {
         try {
             database.removeTable("razdwatrzy");
             fail("Exception should be thrown but wasn't");
-        } catch (TableNotFound tableNotFound) {
+        } catch (TableNotFoundException tableNotFound) {
             tableNotFound.printStackTrace();
         }
     }
