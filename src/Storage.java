@@ -11,7 +11,6 @@ public class Storage {
         databases = new ArrayList<>();
     }
 
-
     void addDatabase(Database _database) throws DatabaseAlreadyExistsException {
         for(Database database : databases){
             if(database.getName().equals(_database.getName())){

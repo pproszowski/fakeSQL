@@ -1,12 +1,27 @@
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class DatabaseTest {
     Database database = new Database("test");
-    Table table = new Table("testTable1");
-    Table anotherTable = new Table("testTable2");
-    Table anotherTable2 = new Table("testTable3");
+    List<Column> columns = Collections.singletonList(new Column("wiek", "number"));
+    Table table;
+    Table anotherTable;
+    Table anotherTable2;
+    {
+        try {
+            table = new Table("testTable1", columns);
+            anotherTable = new Table("testTable2", columns);
+            anotherTable2 = new Table("testTable3", columns);
+        } catch (DuplicateColumnsException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     @Test
     void addingTableToDatabaseShouldIncreaseAmountOfTables(){

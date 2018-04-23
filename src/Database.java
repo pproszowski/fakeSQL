@@ -18,6 +18,7 @@ public class Database {
         }
         tables.add(_table);
     }
+
     public void removeTable(String tableName) throws TableNotFoundException {
         Table tableToDelete = null;
         for(Table table : tables){
@@ -32,6 +33,7 @@ public class Database {
             throw new TableNotFoundException();
         }
     }
+
     public Table getTable(String tableName) throws TableNotFoundException {
         for(Table table : tables){
             if(table.getName().equals(tableName)){
@@ -41,6 +43,7 @@ public class Database {
 
         throw new TableNotFoundException();
     }
+
     public int howManyTables(){
         return tables.size();
     }
