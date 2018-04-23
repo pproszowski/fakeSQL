@@ -2,11 +2,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class StorageTest extends Storage {
-
-    public StorageTest(String _name) {
-        super(_name);
-    }
+class StorageTest{
 
     Storage storage = new Storage("test");
     Database database = new Database("testDatabase1");

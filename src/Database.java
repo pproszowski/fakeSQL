@@ -44,4 +44,8 @@ public class Database {
     public int howManyTables(){
         return tables.size();
     }
+
+    public String getName() {
+        return name;
+    }
 }

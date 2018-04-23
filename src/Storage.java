@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 public class Storage {
@@ -7,24 +8,39 @@ public class Storage {
 
     public Storage(String _name){
         name = _name;
+        databases = new ArrayList<>();
     }
 
 
-    // function are protected only because of first tests, in further version they'll change to private
-
-    protected boolean addDatabase(Database database) throws DatabaseAlreadyExistsException {
-        return true;
+    void addDatabase(Database _database) throws DatabaseAlreadyExistsException {
+        for(Database database : databases){
+            if(database.getName().equals(_database.getName())){
+                throw new DatabaseAlreadyExistsException();
+            }
+        }
+        databases.add(_database);
     }
 
-    protected boolean deleteDatabase(String whichDatabase) throws DatabaseNotFoundException{
-        return true;
+    void deleteDatabase(String whichDatabase) throws DatabaseNotFoundException{
+        Database toDelete = null;
+        for(Database database : databases){
+            if(database.getName().equals(whichDatabase)){
+                toDelete = database;
+            }
+        }
+
+        if(toDelete != null){
+            databases.remove(toDelete);
+        }else{
+            throw new DatabaseNotFoundException();
+        }
     }
 
     public Response executeQuery(Query query){
         return new Response();
     }
 
-    protected int howManyDatabases(){
+    int howManyDatabases(){
         return databases.size();
     }
 
