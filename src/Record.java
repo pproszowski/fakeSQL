@@ -1,7 +1,6 @@
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class Record {
     private Map<String, Tuple> values;
@@ -28,7 +27,8 @@ public class Record {
     public Record getRecordWithOnlySpecifiedColumns(List<String> whichColumns){
         Map<String, Tuple> newValues = new HashMap<>();
         for(Map.Entry entry : values.entrySet()){
-            if(whichColumns.contains(entry.getKey())){
+            String columnName = (String) entry.getKey();
+            if(whichColumns.contains(columnName)){
                 newValues.put((String)entry.getKey(), (Tuple)entry.getValue());
             }
         }
