@@ -43,4 +43,21 @@ public class Storage {
         return databases.size();
     }
 
+    public void setCurrentDatabase(String databaseName) throws DatabaseNotFoundException {
+        for(Database database : databases){
+            if(database.getName().equals(databaseName)){
+                currentDatabase = database;
+                return;
+            }
+        }
+        throw new DatabaseNotFoundException();
+    }
+
+    public Database getCurrentDatabase() throws CurrentDatabaseNotSetException {
+        if(currentDatabase != null){
+            return currentDatabase;
+        }else{
+            throw new CurrentDatabaseNotSetException();
+        }
+    }
 }

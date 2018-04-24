@@ -1,2 +1,3 @@
-public class Query {
+public abstract class Query {
+    public abstract Response execute(Storage storage);
 }
