@@ -1,3 +1,7 @@
+import com.powder.Exception.CurrentDatabaseNotSetException;
+import com.powder.Exception.DatabaseAlreadyExistsException;
+import com.powder.Exception.DatabaseNotFoundException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +24,7 @@ public class Storage {
         databases.add(_database);
     }
 
-    void deleteDatabase(String whichDatabase) throws DatabaseNotFoundException{
+    void deleteDatabase(String whichDatabase) throws DatabaseNotFoundException {
         Database toDelete = null;
         for(Database database : databases){
             if(database.getName().equals(whichDatabase)){

@@ -1,3 +1,6 @@
+import com.powder.Exception.CurrentDatabaseNotSetException;
+import com.powder.Exception.TableAlreadyExistsException;
+import com.powder.Exception.TableNotFoundException;
 import org.json.JSONException;
 import org.json.JSONObject;
 

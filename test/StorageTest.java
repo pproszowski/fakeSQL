@@ -1,3 +1,5 @@
+import com.powder.Exception.DatabaseAlreadyExistsException;
+import com.powder.Exception.DatabaseNotFoundException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

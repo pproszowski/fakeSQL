@@ -1,3 +1,6 @@
+import com.powder.Exception.ColumnNotFoundException;
+import com.powder.Exception.DifferentTypesException;
+import com.powder.Exception.DuplicateColumnsException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -150,6 +153,51 @@ public class Table {
         }
 
         return sB.toString();
+    }
+
+    public String show() {
+        StringBuilder top = null;
+        StringBuilder bottom = null;
+        StringBuilder mid = null;
+        try {
+            top = new StringBuilder();
+            for (Column column : columns) {
+                top.append("+");
+                for (int i = 0; i < column.getWidth() + 2; i++) {
+                    top.append("-");
+                }
+            }
+            top.append("+\n");
+            bottom = new StringBuilder(top);
+            for (Column column : columns) {
+                top.append("|");
+                top.append(" ");
+                top.append(column.getName());
+                int howMuchSpaceLeft = column.getWidth() - column.getName().length() + 1;
+                for (int i = 0; i < howMuchSpaceLeft; i++) {
+                    top.append(" ");
+                }
+            }
+            top.append("|\n");
+
+            mid = new StringBuilder();
+            for (Record record : records) {
+                for (Column column : columns) {
+                    mid.append("|");
+                    mid.append(" ");
+                    mid.append(record.getValueFromColumn(column.getName()));
+                    int howMuchSpaceLeft = column.getWidth() - record.getValueFromColumn(column.getName()).toString().length() + 1;
+                    for (int i = 0; i < howMuchSpaceLeft; i++) {
+                        mid.append(" ");
+                    }
+                }
+                mid.append("|\n");
+            }
+        } catch (ColumnNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return top.toString() + bottom.toString() + mid.toString() + bottom.toString();
     }
 }
 

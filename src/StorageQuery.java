@@ -1,3 +1,5 @@
+import com.powder.Exception.DatabaseAlreadyExistsException;
+import com.powder.Exception.DatabaseNotFoundException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -19,16 +21,17 @@ public class StorageQuery extends Query {
                     storage.addDatabase(database);
                     break;
                 case "setcurrentdatabase":
-                    storage.setCurrentDatabase(query.getString("Name"));
+                    String name = query.getString("Name");
+                    storage.setCurrentDatabase(name);
+                    response.setMessage("Changed database context to '" + name + "'");
                     break;
                 case "removedatabase":
                     storage.deleteDatabase(query.getString("CurrentDatabaseName"));
                     break;
             }
-        } catch (DatabaseAlreadyExistsException e) {
-            e.printStackTrace();
-        } catch (DatabaseNotFoundException e) {
-            e.printStackTrace();
+        } catch (DatabaseAlreadyExistsException | DatabaseNotFoundException e) {
+            response.setValid(false);
+            response.setMessage(e.getMessage());
         }
 
         return response;

@@ -1,5 +1,7 @@
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.powder.Exception.ColumnNotFoundException;
+import jdk.nashorn.internal.ir.LiteralNode;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -61,4 +63,12 @@ public class Record {
         return sB.toString();
     }
 
+    public Tuple getValueFromColumn(String columnName) throws ColumnNotFoundException {
+        for(Map.Entry<String, Tuple> entry : values.entrySet()){
+            if(entry.getKey().equalsIgnoreCase(columnName)){
+                return entry.getValue();
+            }
+        }
+        throw new ColumnNotFoundException();
+    }
 }

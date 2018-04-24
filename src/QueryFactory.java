@@ -1,3 +1,4 @@
+import com.powder.Exception.BadQueryTypeException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -10,18 +11,18 @@ public class QueryFactory {
     private QueryFactory() {
     }
 
-    public Query getQueryJSON(JSONObject jsonQuery) throws JSONException {
+    public Query getQueryJSON(JSONObject jsonQuery) throws JSONException, BadQueryTypeException {
         type = jsonQuery.getString( "Target");
+        JSONObject query = jsonQuery.getJSONObject("Query");
         switch(type.toLowerCase()){
             case "storage":
-                return new StorageQuery();
-                break;
+                return new StorageQuery(query);
             case "database":
-                return new DatabaseQuery();
-                break;
+                return new DatabaseQuery(query);
             case "table":
-                return new TableQuery();
-                break;
+                return new TableQuery(query);
+            default:
+                throw new BadQueryTypeException();
         }
     }
 }

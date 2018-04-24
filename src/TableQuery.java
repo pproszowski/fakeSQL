@@ -1,6 +1,6 @@
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import jdk.nashorn.internal.parser.JSONParser;
+import com.powder.Exception.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,6 +32,7 @@ public class TableQuery extends Query{
                             columnNames.add(columns.getString(i));
                         }
                         table.select(columnNames);
+                        response.setMessage(table.show());
                     break;
                 case "insert":
                         table.insert(new Record(query.getJSONObject("Record")));
@@ -46,16 +47,9 @@ public class TableQuery extends Query{
                     table.update(new Condition(query.getJSONObject("Condition")), newValues);
                     break;
             }
-        } catch (CurrentDatabaseNotSetException | TableNotFoundException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (DuplicateColumnsException e) {
-            e.printStackTrace();
-        } catch (ColumnNotFoundException e) {
-            e.printStackTrace();
-        } catch (DifferentTypesException e) {
-            e.printStackTrace();
+        } catch (CurrentDatabaseNotSetException | TableNotFoundException | JSONException | ColumnNotFoundException | DuplicateColumnsException | DifferentTypesException e) {
+            response.setValid(true);
+            response.setMessage(e.getMessage());
         }
         return response;
     }

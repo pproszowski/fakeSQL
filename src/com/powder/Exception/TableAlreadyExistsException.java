@@ -1,3 +1,5 @@
+package com.powder.Exception;
+
 public class TableAlreadyExistsException extends Exception {
     @Override
     public String getMessage() {

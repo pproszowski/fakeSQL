@@ -1,6 +1,8 @@
+import com.powder.Exception.DuplicateColumnsException;
+import com.powder.Exception.TableAlreadyExistsException;
+import com.powder.Exception.TableNotFoundException;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 

@@ -1,3 +1,5 @@
+import com.powder.Exception.DifferentTypesException;
+import com.powder.Exception.DuplicateColumnsException;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
