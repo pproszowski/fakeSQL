@@ -1,3 +1,7 @@
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +13,18 @@ public class Database {
         name = _name;
         tables = new ArrayList<>();
     }
+
+    public Database(JSONObject database) throws JSONException {
+        name = database.getString("Name");
+        tables = new ArrayList<>();
+        JSONArray jsonTables = database.getJSONArray("Tables");
+        for(int i = 0; i < jsonTables.length(); i++){
+            JSONObject jsonTable = jsonTables.getJSONObject(i);
+            String tableName = jsonTable.getString("Name");
+            tables.add(new Table(jsonTable));
+        }
+    }
+
 
     public void addTable(Table _table) throws TableAlreadyExistsException {
         for(Table table : tables){

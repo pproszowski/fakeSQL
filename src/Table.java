@@ -1,3 +1,7 @@
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.*;
 
 public class Table {
@@ -25,6 +29,26 @@ public class Table {
         }
         this.columns = new ArrayList<>(columns);
         this.records = new ArrayList<>(_records);
+    }
+
+    public Table(JSONObject jsonTable) {
+        try {
+            name = jsonTable.getString("Name");
+            columns = new ArrayList<>();
+            records = new ArrayList<>();
+            JSONArray _columns = jsonTable.getJSONArray("Columns");
+            JSONArray _records = jsonTable.getJSONArray("Records");
+
+            for (int i = 0; i < _columns.length(); i++) {
+                columns.add(new Column(_columns.getJSONObject(i)));
+            }
+
+            for (int i = 0; i < _records.length(); i++) {
+                records.add(new Record(_records.getJSONObject(i)));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     public Table selectAll() throws DuplicateColumnsException {

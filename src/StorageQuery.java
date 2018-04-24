@@ -1,43 +1,34 @@
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class StorageQuery extends Query {
-    private String databaseName;
-    private String type;
-    private Database database;
+    private JSONObject query;
 
-    protected StorageQuery(String _databaseName, String _type){
-        this(null, _databaseName, _type);
-    }
-
-    protected StorageQuery(Database _database, String _databaseName, String _type){
-        databaseName = _databaseName;
-        type = _type;
-        database = _database;
+    protected StorageQuery(JSONObject _query){
+        query = _query;
     }
 
     @Override
-    public Response execute(Storage storage) {
+    public Response execute(Storage storage) throws JSONException {
         Response response = new Response();
-        switch(type.toLowerCase()){
-            case "adddatabase":
-                try {
+        String type = query.getString("Operation");
+        try {
+            switch (type.toLowerCase()) {
+                case "adddatabase":
+                    Database database = new Database(query.getJSONObject("Database"));
                     storage.addDatabase(database);
-                } catch (DatabaseAlreadyExistsException e) {
-                    //change Response
-                }
-                break;
-            case "setcurrentdatabase":
-                try {
-                    storage.setCurrentDatabase(databaseName);
-                } catch (DatabaseNotFoundException e) {
-                    //change Response
-                }
-                break;
-            case "removedatabase":
-                try {
-                    storage.deleteDatabase(databaseName);
-                } catch (DatabaseNotFoundException e) {
-                    //change Response
-                }
-                break;
+                    break;
+                case "setcurrentdatabase":
+                    storage.setCurrentDatabase(query.getString("Name"));
+                    break;
+                case "removedatabase":
+                    storage.deleteDatabase(query.getString("CurrentDatabaseName"));
+                    break;
+            }
+        } catch (DatabaseAlreadyExistsException e) {
+            e.printStackTrace();
+        } catch (DatabaseNotFoundException e) {
+            e.printStackTrace();
         }
 
         return response;

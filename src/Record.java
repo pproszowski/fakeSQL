@@ -1,3 +1,8 @@
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +27,12 @@ public class Record {
             }
         }
         values.entrySet().removeAll(toRemove.entrySet());
+    }
+
+    public Record(JSONObject record) throws JSONException {
+        values = new Gson().fromJson(
+                record.getJSONObject("NewValues").toString(), new TypeToken<HashMap<String, Tuple>>(){}.getType()
+        );
     }
 
     public Record getRecordWithOnlySpecifiedColumns(List<String> whichColumns){

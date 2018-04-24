@@ -1,41 +1,35 @@
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class DatabaseQuery extends Query{
-    private String tableName;
-    private String type;
-    private Table table;
-    private Database database;
+    private JSONObject query;
 
-    public DatabaseQuery(String _tableName, String _type){
-        tableName = _tableName;
-        type = _type;
-    }
-
-    public DatabaseQuery(Table _table, String _type){
-        this(_table.getName(), _type);
-        table = _table;
+    public DatabaseQuery(JSONObject _query){
+        query = _query;
     }
 
     @Override
     public Response execute(Storage storage) {
         Response response = new Response();
         try {
-            database = storage.getCurrentDatabase();
+            String type = query.getString("Operation");
+            Database database = storage.getCurrentDatabase();
+            switch (type.toLowerCase()) {
+                case "addtable":
+                    database.addTable(new Table(query.getJSONObject("Table")));
+                    break;
+                case "deletetable":
+                    database.removeTable(query.getString("TableName"));
+                    break;
+            }
         } catch (CurrentDatabaseNotSetException e) {
             e.printStackTrace();
-        }
-        switch(type.toLowerCase()){
-            case "addtable":
-                try {
-                    database.addTable(table);
-                } catch (TableAlreadyExistsException e) {
-                }
-                break;
-            case "deletetable":
-                try {
-                    database.removeTable(tableName);
-                } catch (TableNotFoundException e) {
-                    e.printStackTrace();
-                }
-                break;
+        } catch (TableNotFoundException e) {
+            e.printStackTrace();
+        } catch (TableAlreadyExistsException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
 
         return response;
