@@ -1,6 +1,7 @@
 import com.powder.Exception.ColumnNotFoundException;
 import com.powder.Exception.DifferentTypesException;
 import com.powder.Exception.DuplicateColumnsException;
+import com.powder.Exception.InvalidTypeException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -89,21 +90,19 @@ public class Table {
         }
     }
 
-    public void insert(Record record) throws DifferentTypesException, ColumnNotFoundException {
+    public void insert(Record record) throws DifferentTypesException, ColumnNotFoundException, InvalidTypeException {
 
         Record copy = new Record(record);
-        int widestColumn = 0;
         for(Map.Entry<String, Tuple> entry : record.getValues().entrySet()){
            for(Column column : columns){
-               if(column.getName().equals(entry.getKey())){
+               if(column.getName().equalsIgnoreCase(entry.getKey())){
                    Tuple tuple = entry.getValue();
-                   if(!column.getType().equals(tuple.getType())){
+                   if(!column.getType().getName().equals(tuple.getType())){
                        throw new DifferentTypesException();
                    }
-                   if(tuple.toString().length() > widestColumn){
-                       widestColumn = tuple.toString().length() + 2;
+                   if(tuple.toString().length() > column.getWidth()){
+                       column.expandWidth(tuple.toString().length() + 2);
                    }
-                   column.expandWidth(widestColumn);
                    copy.getValues().remove(entry.getKey());
                }
            }
@@ -133,13 +132,25 @@ public class Table {
             this.records = copy.records;
         } catch (DuplicateColumnsException e) {
             //impossible to happen
+        } catch (InvalidTypeException e) {
+            e.printStackTrace();
         }
     }
 
     public void delete(Condition condition){
+        if(condition.isEmpty()){
+            records.clear();
+        }
     }
 
     public void update(Condition condition, Map<String, Tuple> newValues){
+        if(condition.isEmpty()){
+            for(Map.Entry entry : newValues.entrySet()){
+                for(Record record : records){
+                    record.update((String)entry.getKey(), (Tuple)entry.getValue());
+                }
+            }
+        }
     }
 
     public String getName() {

@@ -8,4 +8,8 @@ public class Condition {
     public Condition() {
 
     }
+
+    public boolean isEmpty(){
+        return true;
+    }
 }

@@ -1,6 +1,7 @@
 import com.powder.Exception.ColumnNotFoundException;
 import com.powder.Exception.DifferentTypesException;
 import com.powder.Exception.DuplicateColumnsException;
+import com.powder.Exception.InvalidTypeException;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -56,6 +57,8 @@ class TableTest {
             assertEquals(table, table.selectAll());
         } catch (DuplicateColumnsException | ColumnNotFoundException | DifferentTypesException e) {
             e.printStackTrace();
+        } catch (InvalidTypeException e) {
+            e.printStackTrace();
         }
     }
 
@@ -76,6 +79,16 @@ class TableTest {
             assertEquals(selectedTable.toString(), anotherTable.toString());
         } catch (DuplicateColumnsException | ColumnNotFoundException | DifferentTypesException e) {
             e.printStackTrace();
+        } catch (InvalidTypeException e) {
+            e.printStackTrace();
         }
+    }
+
+    @Test
+    void testingVisualisation() throws DuplicateColumnsException, DifferentTypesException, ColumnNotFoundException, InvalidTypeException {
+        Table table = new Table("test", columns);
+        table.insert(record);
+        table.insert(anotherRecord);
+        System.out.println(table.show());
     }
 }

@@ -48,7 +48,6 @@ public class Record {
         return new Record(newValues);
     }
 
-
     public Map<String, Tuple> getValues(){
         return values;
     }
@@ -70,5 +69,10 @@ public class Record {
             }
         }
         throw new ColumnNotFoundException();
+    }
+
+    public void update(String whichColumn, Tuple newValue){
+        values.remove(whichColumn);
+        values.put(whichColumn, newValue);
     }
 }

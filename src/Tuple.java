@@ -8,11 +8,12 @@ public class Tuple<T> {
     }
 
     private void determineType() {
-        String className = value.getClass().getName();
+        String className = value.getClass().getSimpleName();
         switch(className.toLowerCase()){
             case "string":
                 type = "string";
                 break;
+            case "int":
             case "integer":
             case "double":
             case "float":

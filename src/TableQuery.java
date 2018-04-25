@@ -50,6 +50,8 @@ public class TableQuery extends Query{
         } catch (CurrentDatabaseNotSetException | TableNotFoundException | JSONException | ColumnNotFoundException | DuplicateColumnsException | DifferentTypesException e) {
             response.setValid(true);
             response.setMessage(e.getMessage());
+        } catch (InvalidTypeException e) {
+            e.printStackTrace();
         }
         return response;
     }

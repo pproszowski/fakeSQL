@@ -1,3 +1,4 @@
+import com.powder.Exception.InvalidTypeException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -19,7 +20,7 @@ public class Type {
         return limit;
     }
 
-    public String getName() {
+    public String getName() throws InvalidTypeException {
         return name;
     }
 }
