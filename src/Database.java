@@ -29,7 +29,7 @@ public class Database {
     public void addTable(Table _table) throws TableAlreadyExistsException {
         for(Table table : tables){
             if(table.getName().equals(_table.getName())){
-                throw new TableAlreadyExistsException();
+                throw new TableAlreadyExistsException(table.getName() ,this.getName());
             }
         }
         tables.add(_table);
@@ -46,18 +46,18 @@ public class Database {
         if(tableToDelete != null){
             tables.remove(tableToDelete);
         }else{
-            throw new TableNotFoundException();
+            throw new TableNotFoundException(this.getName(), tableName);
         }
     }
 
     public Table getTable(String tableName) throws TableNotFoundException {
         for(Table table : tables){
-            if(table.getName().equals(tableName)){
+            if(table.getName().equalsIgnoreCase(tableName)){
                 return table;
             }
         }
 
-        throw new TableNotFoundException();
+        throw new TableNotFoundException(this.getName(), tableName);
     }
 
     public int howManyTables(){

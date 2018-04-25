@@ -20,6 +20,10 @@ public class Column {
         this(_name, new Type(_typeName, 255));
     }
 
+    public int getLimit(){
+        return type.getLimit();
+    }
+
     public String getName() {
         return name;
     }

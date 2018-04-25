@@ -31,9 +31,9 @@ public class Record {
         values.entrySet().removeAll(toRemove.entrySet());
     }
 
-    public Record(JSONObject record) throws JSONException {
+    public Record(JSONObject record) {
         values = new Gson().fromJson(
-                record.getJSONObject("NewValues").toString(), new TypeToken<HashMap<String, Tuple>>(){}.getType()
+                record.toString(), new TypeToken<HashMap<String, Tuple>>(){}.getType()
         );
     }
 
@@ -71,8 +71,13 @@ public class Record {
         throw new ColumnNotFoundException();
     }
 
-    public void update(String whichColumn, Tuple newValue){
-        values.remove(whichColumn);
-        values.put(whichColumn, newValue);
+    public boolean update(String whichColumn, Tuple newValue){
+        if(values.get(whichColumn) != newValue){
+            values.remove(whichColumn);
+            values.put(whichColumn, newValue);
+            return true;
+        }else{
+            return false;
+        }
     }
 }

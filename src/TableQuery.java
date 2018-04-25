@@ -18,12 +18,13 @@ public class TableQuery extends Query{
     }
 
     @Override
-    public Response execute(Storage storage) {
+    public Response execute(Storage storage) throws JSONException{
         Response response = new Response();
         try {
             String type = query.getString("Operation");
             Database database = storage.getCurrentDatabase();
             Table table = database.getTable(query.getString("Name"));
+            int howMany;
             switch(type.toLowerCase()){
                 case "select":
                         JSONArray columns = query.getJSONArray("ColumnNames");
@@ -31,27 +32,28 @@ public class TableQuery extends Query{
                         for(int i = 0; i < columns.length(); i++){
                             columnNames.add(columns.getString(i));
                         }
-                        table.select(columnNames);
-                        response.setMessage(table.show());
+                        response.setMessage(table.select(columnNames).show());
                     break;
                 case "insert":
                         table.insert(new Record(query.getJSONObject("Record")));
                     break;
                 case "delete":
-                    table.delete(new Condition(query.getJSONObject("Condition")));
+                    howMany = table.delete(new Condition(query.getJSONObject("Condition")));
+                    response.setMessage("(" + howMany + ") rows has been removed");
                     break;
                 case "update":
                     Map<String, Tuple> changes = new Gson().fromJson(
                             query.getJSONObject("Changes").toString(), new TypeToken<HashMap<String, Tuple>>(){}.getType()
                     );
-                    table.update(new Condition(query.getJSONObject("Condition")), changes);
+                    howMany = table.update(new Condition(query.getJSONObject("Condition")), changes);
+                    response.setMessage("(" + howMany + ") records has been affected");
                     break;
             }
-        } catch (CurrentDatabaseNotSetException | TableNotFoundException | JSONException | ColumnNotFoundException | DuplicateColumnsException | DifferentTypesException e) {
             response.setValid(true);
+        } catch (CurrentDatabaseNotSetException | UnknownTypeException | DuplicateColumnsException | ColumnNotFoundException | DifferentTypesException | TableNotFoundException e) {
+            response.setValid(false);
             response.setMessage(e.getMessage());
-        } catch (InvalidTypeException e) {
-            e.printStackTrace();
+            return response;
         }
         return response;
     }

@@ -1,7 +1,6 @@
 public class Response {
     private boolean isValid;
     private String message;
-    private Table table;
 
     public Response(){
         isValid = true;
@@ -14,14 +13,6 @@ public class Response {
 
     public void setValid(boolean valid) {
         isValid = valid;
-    }
-
-    public Table getTable() {
-        return table;
-    }
-
-    public void setTable(Table table) {
-        this.table = table;
     }
 
     public String getMessage() {

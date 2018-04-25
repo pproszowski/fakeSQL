@@ -25,13 +25,17 @@ public class StorageQuery extends Query {
                     storage.setCurrentDatabase(name);
                     response.setMessage("Changed database context to '" + name + "'");
                     break;
-                case "removedatabase":
-                    storage.deleteDatabase(query.getString("CurrentDatabaseName"));
+                case "dropdatabase":
+                    //TODO: it's not implemented int Parser yet, you know what to do!
+                    storage.deleteDatabase(query.getString("Name"));
+                    response.setMessage("Database " + "\"" + query.getString("Name") + "\"" + " has been dropped");
                     break;
             }
+            response.setValid(true);
         } catch (DatabaseAlreadyExistsException | DatabaseNotFoundException e) {
             response.setValid(false);
             response.setMessage(e.getMessage());
+            return response;
         }
 
         return response;

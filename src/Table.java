@@ -1,7 +1,4 @@
-import com.powder.Exception.ColumnNotFoundException;
-import com.powder.Exception.DifferentTypesException;
-import com.powder.Exception.DuplicateColumnsException;
-import com.powder.Exception.InvalidTypeException;
+import com.powder.Exception.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -72,7 +69,7 @@ public class Table {
         List<Column> _columns = new ArrayList<>();
         for(String columnName : whichColumns){
             for(Column column : columns){
-                if(columnName.equals(column.getName())){
+                if(columnName.equalsIgnoreCase(column.getName())){
                     _columns.add(column);
                 }
             }
@@ -90,7 +87,7 @@ public class Table {
         }
     }
 
-    public void insert(Record record) throws DifferentTypesException, ColumnNotFoundException, InvalidTypeException {
+    public void insert(Record record) throws DifferentTypesException, ColumnNotFoundException, UnknownTypeException {
 
         Record copy = new Record(record);
         for(Map.Entry<String, Tuple> entry : record.getValues().entrySet()){
@@ -132,25 +129,32 @@ public class Table {
             this.records = copy.records;
         } catch (DuplicateColumnsException e) {
             //impossible to happen
-        } catch (InvalidTypeException e) {
+        } catch (UnknownTypeException e) {
             e.printStackTrace();
         }
     }
 
-    public void delete(Condition condition){
+    public int delete(Condition condition){
+        int sizeBefore = records.size();
         if(condition.isEmpty()){
             records.clear();
         }
+
+        return sizeBefore - records.size();
     }
 
-    public void update(Condition condition, Map<String, Tuple> newValues){
+    public int update(Condition condition, Map<String, Tuple> newValues){
+        int howMany = 0;
         if(condition.isEmpty()){
             for(Map.Entry entry : newValues.entrySet()){
                 for(Record record : records){
-                    record.update((String)entry.getKey(), (Tuple)entry.getValue());
+                    if(record.update((String)entry.getKey(), (Tuple)entry.getValue())){
+                        howMany++;
+                    }
                 }
             }
         }
+        return howMany;
     }
 
     public String getName() {

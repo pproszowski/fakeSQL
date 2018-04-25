@@ -1,7 +1,4 @@
-import com.powder.Exception.ColumnNotFoundException;
-import com.powder.Exception.DifferentTypesException;
-import com.powder.Exception.DuplicateColumnsException;
-import com.powder.Exception.InvalidTypeException;
+import com.powder.Exception.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -49,7 +46,7 @@ class TableTest {
     }
 
     @Test
-    void selectAllReturnsExpectedTable(){
+    void selectAllReturnsExpectedTable() throws UnknownTypeException {
         try {
             Table table = new Table("testTable", columns);
             table.insert(record);
@@ -57,13 +54,11 @@ class TableTest {
             assertEquals(table, table.selectAll());
         } catch (DuplicateColumnsException | ColumnNotFoundException | DifferentTypesException e) {
             e.printStackTrace();
-        } catch (InvalidTypeException e) {
-            e.printStackTrace();
         }
     }
 
     @Test
-    void selectFewColumnsReturnsExpectedTable(){
+    void selectFewColumnsReturnsExpectedTable() throws UnknownTypeException {
         try {
             Table table = new Table("testTable", columns);
             table.insert(record);
@@ -79,13 +74,11 @@ class TableTest {
             assertEquals(selectedTable.toString(), anotherTable.toString());
         } catch (DuplicateColumnsException | ColumnNotFoundException | DifferentTypesException e) {
             e.printStackTrace();
-        } catch (InvalidTypeException e) {
-            e.printStackTrace();
         }
     }
 
     @Test
-    void testingVisualisation() throws DuplicateColumnsException, DifferentTypesException, ColumnNotFoundException, InvalidTypeException {
+    void testingVisualisation() throws DuplicateColumnsException, DifferentTypesException, ColumnNotFoundException, InvalidTypeException, UnknownTypeException {
         Table table = new Table("test", columns);
         table.insert(record);
         table.insert(anotherRecord);

@@ -1,27 +1,16 @@
+import com.powder.Exception.UnknownTypeException;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class Tuple<T> {
     private T value;
     private String type;
 
-    public Tuple(T _value){
+    public Tuple(T _value) {
         value = _value;
-        determineType();
+        type = Type.determineType(String.valueOf(value));
     }
-
-    private void determineType() {
-        String className = value.getClass().getSimpleName();
-        switch(className.toLowerCase()){
-            case "string":
-                type = "string";
-                break;
-            case "int":
-            case "integer":
-            case "double":
-            case "float":
-                type = "number";
-                break;
-        }
-    }
-
 
     public String getType() {
         return type;

@@ -22,6 +22,10 @@ public class Storage {
                 throw new DatabaseAlreadyExistsException();
             }
         }
+
+        if(databases.isEmpty()){
+            currentDatabase = _database;
+        }
         databases.add(_database);
     }
 
@@ -35,16 +39,17 @@ public class Storage {
 
         if(toDelete != null){
             databases.remove(toDelete);
+            if(databases.isEmpty()){
+                currentDatabase = null;
+            }
         }else{
             throw new DatabaseNotFoundException();
         }
     }
 
     public Response executeQuery(Query query) throws JSONException {
-        query.execute(this);
-        return new Response();
+        return query.execute(this);
     }
-
     int howManyDatabases(){
         return databases.size();
     }

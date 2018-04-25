@@ -12,27 +12,26 @@ public class DatabaseQuery extends Query{
     }
 
     @Override
-    public Response execute(Storage storage) {
+    public Response execute(Storage storage) throws JSONException {
         Response response = new Response();
         try {
             String type = query.getString("Operation");
             Database database = storage.getCurrentDatabase();
             switch (type.toLowerCase()) {
                 case "addtable":
-                    database.addTable(new Table(query.getJSONObject("Table")));
+                    Table table = new Table(query.getJSONObject("Table"));
+                    database.addTable(table);
+                    response.setMessage("Table " + table.getName() + " has been added");
                     break;
                 case "deletetable":
                     database.removeTable(query.getString("Name"));
                     break;
             }
-        } catch (CurrentDatabaseNotSetException e) {
-            e.printStackTrace();
-        } catch (TableNotFoundException e) {
-            e.printStackTrace();
-        } catch (TableAlreadyExistsException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
+            response.setValid(true);
+        } catch (CurrentDatabaseNotSetException | TableNotFoundException | TableAlreadyExistsException e) {
+            response.setValid(false);
+            response.setMessage(e.getMessage());
+            return response;
         }
 
         return response;
