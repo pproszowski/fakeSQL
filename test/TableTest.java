@@ -1,3 +1,4 @@
+import com.powder.Exception.ColumnNotFoundException;
 import com.powder.Exception.DifferentTypesException;
 import com.powder.Exception.DuplicateColumnsException;
 import org.junit.jupiter.api.Test;
@@ -47,7 +48,7 @@ class TableTest {
     }
 
     @Test
-    void selectAllReturnsExpectedTable(){
+    void selectAllReturnsExpectedTable() throws ColumnNotFoundException {
         try {
             Table table = new Table("testTable", columns);
             table.insert(record);
