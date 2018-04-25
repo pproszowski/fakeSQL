@@ -27,4 +27,8 @@ public class Column {
     public int getWidth() {
         return width;
     }
+
+    public void expandWidth(int _width){
+        width = _width;
+    }
 }

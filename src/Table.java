@@ -92,6 +92,7 @@ public class Table {
     public void insert(Record record) throws DifferentTypesException, ColumnNotFoundException {
 
         Record copy = new Record(record);
+        int widestColumn = 0;
         for(Map.Entry<String, Tuple> entry : record.getValues().entrySet()){
            for(Column column : columns){
                if(column.getName().equals(entry.getKey())){
@@ -99,6 +100,10 @@ public class Table {
                    if(!column.getType().equals(tuple.getType())){
                        throw new DifferentTypesException();
                    }
+                   if(tuple.toString().length() > widestColumn){
+                       widestColumn = tuple.toString().length() + 2;
+                   }
+                   column.expandWidth(widestColumn);
                    copy.getValues().remove(entry.getKey());
                }
            }
@@ -114,6 +119,7 @@ public class Table {
         }else{
             throw new ColumnNotFoundException();
         }
+
     }
 
     public void insert(List<Record> _records) throws DifferentTypesException, ColumnNotFoundException {
