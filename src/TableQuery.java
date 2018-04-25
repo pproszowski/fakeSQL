@@ -23,7 +23,7 @@ public class TableQuery extends Query{
         try {
             String type = query.getString("Operation");
             Database database = storage.getCurrentDatabase();
-            Table table = database.getTable(query.getString("TableName"));
+            Table table = database.getTable(query.getString("Name"));
             switch(type.toLowerCase()){
                 case "select":
                         JSONArray columns = query.getJSONArray("ColumnNames");
@@ -41,10 +41,10 @@ public class TableQuery extends Query{
                     table.delete(new Condition(query.getJSONObject("Condition")));
                     break;
                 case "update":
-                    Map<String, Tuple> newValues = new Gson().fromJson(
-                            query.getJSONObject("NewValues").toString(), new TypeToken<HashMap<String, Tuple>>(){}.getType()
+                    Map<String, Tuple> changes = new Gson().fromJson(
+                            query.getJSONObject("Changes").toString(), new TypeToken<HashMap<String, Tuple>>(){}.getType()
                     );
-                    table.update(new Condition(query.getJSONObject("Condition")), newValues);
+                    table.update(new Condition(query.getJSONObject("Condition")), changes);
                     break;
             }
         } catch (CurrentDatabaseNotSetException | TableNotFoundException | JSONException | ColumnNotFoundException | DuplicateColumnsException | DifferentTypesException e) {

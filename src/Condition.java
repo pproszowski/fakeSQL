@@ -4,4 +4,8 @@ public class Condition {
     public Condition(JSONObject condition) {
 
     }
+
+    public Condition() {
+
+    }
 }

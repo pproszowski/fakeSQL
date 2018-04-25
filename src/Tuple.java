@@ -26,6 +26,11 @@ public class Tuple<T> {
         return type;
     }
 
+    public T getValue(){
+        return value;
+    }
+
+
     @Override
     public String toString() {
         return value.toString();

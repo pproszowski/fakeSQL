@@ -22,7 +22,7 @@ public class DatabaseQuery extends Query{
                     database.addTable(new Table(query.getJSONObject("Table")));
                     break;
                 case "deletetable":
-                    database.removeTable(query.getString("TableName"));
+                    database.removeTable(query.getString("Name"));
                     break;
             }
         } catch (CurrentDatabaseNotSetException e) {
