@@ -1,6 +1,7 @@
 import com.powder.Exception.CurrentDatabaseNotSetException;
 import com.powder.Exception.DatabaseAlreadyExistsException;
 import com.powder.Exception.DatabaseNotFoundException;
+import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +40,8 @@ public class Storage {
         }
     }
 
-    public Response executeQuery(Query query){
+    public Response executeQuery(Query query) throws JSONException {
+        query.execute(this);
         return new Response();
     }
 

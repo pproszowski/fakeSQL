@@ -1,13 +1,12 @@
 import com.powder.Exception.IncorrectSyntaxException;
 import com.powder.Exception.InvalidKeyWordException;
 import com.powder.Exception.NotSpecifiedFromWhichTableException;
+import com.sun.org.apache.xerces.internal.impl.xpath.regex.Match;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,11 +24,12 @@ public class Parser {
             case "INSERT":
                 jsonObject = insertCase(words);
                 break;
+            case "CREATE":
+                jsonObject = createCase(words);
+                break;
             case "UPDATE":
                 break;
             case "DELETE":
-                break;
-            case "CREATE":
                 break;
             case "SET":
                 break;
@@ -37,7 +37,6 @@ public class Parser {
                 throw new InvalidKeyWordException();
         }
 
-        jsonObject.put("Target", "table");
         return jsonObject;
     }
 
@@ -78,7 +77,7 @@ public class Parser {
         }else{
             //TODO: implement WHERE and JOIN
         }
-
+        jsonObject.put("Target", "table");
         return jsonObject;
     }
 
@@ -132,6 +131,7 @@ public class Parser {
         query.put("Keys", JSONcolumnNames);
         query.put("Values", JSONvalues);
         jsonObject.put("Query", query);
+        jsonObject.put("Target", "table");
         return jsonObject;
     }
 
@@ -180,6 +180,101 @@ public class Parser {
             }
         }
         return toReturn.toString();
+    }
+
+    private static JSONObject createCase(List<String> words) throws JSONException, IncorrectSyntaxException {
+        JSONObject jsonObject = null;
+        switch(words.get(1).toUpperCase()){
+            case "TABLE":
+                jsonObject = createTableCase(words);
+                jsonObject.put("Target", "Database");
+                break;
+            case "DATABASE":
+                jsonObject = createDatabaseCase(words);
+                jsonObject.put("Target", "Storage");
+                break;
+        }
+
+        return jsonObject;
+    }
+
+    private static JSONObject createTableCase(List<String> words) throws JSONException, IncorrectSyntaxException {
+        JSONObject jsonObject = new JSONObject();
+        JSONObject query = new JSONObject();
+        query.put("Operation", "addtable");
+
+        String tableName = words.get(2);
+
+        if(!words.get(3).equals("(")){
+            throw new IncorrectSyntaxException();
+        }
+
+        if(words.get(words.size()-1).equals(";")){
+            words.remove(words.size()-1);
+        }
+
+        if(!words.get(words.size()-1).equals(")")){
+            throw new IncorrectSyntaxException();
+        }
+
+        Map<String, Type> columns = getColumns(words.subList(4, words.size()-1));
+        JSONObject table = new JSONObject();
+        table.put("Name", tableName);
+        JSONArray jsonColumns = new JSONArray();
+        for(Map.Entry<String, Type> entry : columns.entrySet()){
+            JSONObject column = new JSONObject();
+            column.put("Name", entry.getKey());
+            JSONObject type = new JSONObject();
+            type.put("Name", entry.getValue().getName());
+            type.put("Limit", entry.getValue().getLimit());
+            column.put("Type", type);
+            jsonColumns.put(column);
+        }
+
+        table.put("Arrays", jsonColumns);
+
+        return jsonObject;
+    }
+
+    private static Map<String,Type> getColumns(List<String> words) {
+        Map<String, Type> columns = new HashMap<>();
+        StringBuilder columnsString = new StringBuilder();
+        for(String word : words){
+            columnsString.append(word).append(" ");
+        }
+
+        String[] columnsList = columnsString.toString().split(",");
+        Pattern oneColumn = Pattern.compile("(\\s*\\w+)(\\s+\\w+[(]?)(\\s*\\(\\s*\\d+\\s*\\))");
+        for(String columnString : columnsList){
+            Matcher matcher = oneColumn.matcher(columnString);
+            if(matcher.find()){
+                columns.put(matcher.group(1), new Type(matcher.group(2), Integer.parseInt(matcher.group(3))));
+            }else{
+                return (Map<String, Type>) new IncorrectSyntaxException();
+            }
+        }
+
+        return columns;
+    }
+
+    private static JSONObject createDatabaseCase(List<String> words) throws IncorrectSyntaxException, JSONException {
+        if(words.size() > 3){
+            if(!words.get(3).equals(";")){
+                throw new IncorrectSyntaxException();
+            }
+        }
+        JSONObject jsonObject = new JSONObject();
+        JSONObject query = new JSONObject();
+        JSONObject database = new JSONObject();
+        database.put("Name", words.get(2));
+        JSONArray jsonArray = new JSONArray();
+        database.put("Tables", jsonArray);
+        query.put("Database", database);
+        query.put("Operation", "adddatabase");
+        jsonObject.put("Query", query);
+
+
+        return jsonObject;
     }
 }
 

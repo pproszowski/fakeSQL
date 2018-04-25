@@ -11,7 +11,7 @@ public class QueryFactory {
     private QueryFactory() {
     }
 
-    public Query getQueryJSON(JSONObject jsonQuery) throws JSONException, BadQueryTypeException {
+    public Query getQuery(JSONObject jsonQuery) throws JSONException, BadQueryTypeException {
         type = jsonQuery.getString( "Target");
         JSONObject query = jsonQuery.getJSONObject("Query");
         switch(type.toLowerCase()){

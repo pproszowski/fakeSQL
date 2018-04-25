@@ -3,24 +3,28 @@ import org.json.JSONObject;
 
 public class Column {
     private String name;
-    private String type;
+    private Type type;
     private int width;
 
-    public Column(String _name, String _type){
+    public Column(String _name, Type _type){
         name = _name;
         type = _type;
         width = name.length();
     }
 
     public Column(JSONObject jsonObject) throws JSONException {
-        this(jsonObject.getString("Name"), jsonObject.getString("Type"));
+        this(jsonObject.getString("Name"), new Type(jsonObject.getJSONObject("Type")));
+    }
+
+    public Column(String _name , String _typeName) {
+        this(_name, new Type(_typeName, 255));
     }
 
     public String getName() {
         return name;
     }
 
-    public String getType() {
+    public Type getType() {
         return type;
     }
 

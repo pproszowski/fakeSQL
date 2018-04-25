@@ -48,7 +48,7 @@ class TableTest {
     }
 
     @Test
-    void selectAllReturnsExpectedTable() throws ColumnNotFoundException {
+    void selectAllReturnsExpectedTable(){
         try {
             Table table = new Table("testTable", columns);
             table.insert(record);
