@@ -3,6 +3,8 @@ import com.powder.Exception.DatabaseNotFoundException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.FileNotFoundException;
+
 public class StorageQuery extends Query {
     private JSONObject query;
 
@@ -36,6 +38,8 @@ public class StorageQuery extends Query {
             response.setValid(false);
             response.setMessage(e.getMessage());
             return response;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
 
         return response;

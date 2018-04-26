@@ -1,5 +1,6 @@
 import com.powder.Exception.DatabaseAlreadyExistsException;
 import com.powder.Exception.DatabaseNotFoundException;
+import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -12,7 +13,7 @@ class StorageTest{
     Database anotherDatabase2 = new Database("testDatabase3");
 
     @Test
-    void addingDatabaseToStorageShouldIncreaseAmountOfDatabases(){
+    void addingDatabaseToStorageShouldIncreaseAmountOfDatabases() throws JSONException {
             assertEquals(0, database.howManyTables());
         try {
             storage.addDatabase(database);
@@ -27,7 +28,7 @@ class StorageTest{
     }
 
     @Test
-    void when_table_duplicates_another_exception_should_be_thrown(){
+    void when_table_duplicates_another_exception_should_be_thrown() throws JSONException {
         try {
             storage.addDatabase(database);
             storage.addDatabase(database);
@@ -38,7 +39,7 @@ class StorageTest{
     }
 
     @Test
-    void delete_non_existing_table_throws_exception(){
+    void delete_non_existing_table_throws_exception() throws JSONException {
         try {
             storage.deleteDatabase("razdwatrzy");
             fail("Exception should be thrown but wasn't");

@@ -1,6 +1,7 @@
 import com.powder.Exception.DuplicateColumnsException;
 import com.powder.Exception.TableAlreadyExistsException;
 import com.powder.Exception.TableNotFoundException;
+import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
@@ -26,7 +27,7 @@ class DatabaseTest {
 
 
     @Test
-    void addingTableToDatabaseShouldIncreaseAmountOfTables(){
+    void addingTableToDatabaseShouldIncreaseAmountOfTables() throws JSONException {
         try{
             assertEquals(0, database.howManyTables());
             database.addTable(table);
@@ -41,7 +42,7 @@ class DatabaseTest {
     }
 
     @Test
-    void when_table_duplicates_another_exception_should_be_thrown(){
+    void when_table_duplicates_another_exception_should_be_thrown() throws JSONException {
         try {
             database.addTable(table);
             database.addTable(table);
@@ -52,7 +53,7 @@ class DatabaseTest {
     }
 
     @Test
-    void delete_non_existing_table_throws_exception(){
+    void delete_non_existing_table_throws_exception() throws JSONException {
         try {
             database.removeTable("razdwatrzy");
             fail("Exception should be thrown but wasn't");

@@ -1,4 +1,5 @@
 import com.powder.Exception.*;
+import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -54,6 +55,8 @@ class TableTest {
             assertEquals(table, table.selectAll());
         } catch (DuplicateColumnsException | ColumnNotFoundException | DifferentTypesException e) {
             e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 
@@ -74,11 +77,13 @@ class TableTest {
             assertEquals(selectedTable.toString(), anotherTable.toString());
         } catch (DuplicateColumnsException | ColumnNotFoundException | DifferentTypesException e) {
             e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 
     @Test
-    void testingVisualisation() throws DuplicateColumnsException, DifferentTypesException, ColumnNotFoundException, InvalidTypeException, UnknownTypeException {
+    void testingVisualisation() throws DuplicateColumnsException, DifferentTypesException, ColumnNotFoundException, InvalidTypeException, UnknownTypeException, JSONException {
         Table table = new Table("test", columns);
         table.insert(record);
         table.insert(anotherRecord);
