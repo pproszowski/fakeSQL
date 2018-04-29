@@ -1,5 +1,3 @@
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.powder.Exception.CurrentDatabaseNotSetException;
 import com.powder.Exception.DatabaseAlreadyExistsException;
 import com.powder.Exception.DatabaseNotFoundException;
@@ -16,15 +14,16 @@ public class Storage {
     private String name;
     private List<Database> databases;
     private Database currentDatabase;
-    private String pathToDatabases = System.getProperty("user.dir") + "Storages/Databases";
-    private String pathToMyFolder = System.getProperty("user.dir") + "Storages";
 
-    public Storage(String _name){
+    public Storage(String _name) throws IOException, JSONException {
         name = _name;
         databases = new ArrayList<>();
+        addNameOfStorageToList();
     }
 
-    public Storage(JSONObject jsonStorage) throws JSONException, FileNotFoundException {
+    public Storage(JSONObject jsonStorage) throws JSONException, IOException {
+        databases = new ArrayList<>();
+        System.out.println(jsonStorage.toString());
         name = jsonStorage.getString("Name");
         JSONArray jsonDatabaseNames = jsonStorage.getJSONArray("DatabaseNames");
         List<String> databaseNames = new ArrayList<>();
@@ -33,10 +32,8 @@ public class Storage {
         }
 
         for(String databaseName : databaseNames){
-            File file = new File(pathToDatabases + "/" + databaseName + ".json");
-            Scanner scanner = new Scanner(file);
-            scanner.useDelimiter("\\Z");
-            JSONObject jsonDatabase = new JSONObject(scanner.next());
+            ResourceManager resourceManager = new ResourceManager("res/Storages/Databases/",databaseName);
+            JSONObject jsonDatabase = new JSONObject(resourceManager.readFromResource());
             Database database = new Database(jsonDatabase);
             databases.add(database);
         }
@@ -48,9 +45,10 @@ public class Storage {
                 }
             }
         }
+        addNameOfStorageToList();
     }
 
-    void addDatabase(Database _database) throws DatabaseAlreadyExistsException, JSONException {
+    void addDatabase(Database _database) throws DatabaseAlreadyExistsException, JSONException, IOException {
         for(Database database : databases){
             if(database.getName().equals(_database.getName())){
                 throw new DatabaseAlreadyExistsException();
@@ -64,7 +62,7 @@ public class Storage {
         saveToFile();
     }
 
-    void deleteDatabase(String whichDatabase) throws DatabaseNotFoundException, JSONException {
+    void deleteDatabase(String whichDatabase) throws DatabaseNotFoundException, JSONException, IOException {
         Database toDelete = null;
         for(Database database : databases){
             if(database.getName().equals(whichDatabase)){
@@ -83,7 +81,7 @@ public class Storage {
         }
     }
 
-    public Response executeQuery(Query query) throws JSONException {
+    public Response executeQuery(Query query) throws JSONException, IOException {
         return query.execute(this);
     }
 
@@ -91,10 +89,11 @@ public class Storage {
         return databases.size();
     }
 
-    public void setCurrentDatabase(String databaseName) throws DatabaseNotFoundException {
+    public void setCurrentDatabase(String databaseName) throws DatabaseNotFoundException, IOException, JSONException {
         for(Database database : databases){
             if(database.getName().equals(databaseName)){
                 currentDatabase = database;
+                saveToFile();
                 return;
             }
         }
@@ -109,11 +108,7 @@ public class Storage {
         }
     }
 
-    public void saveToFile() throws JSONException {
-        File file = new File(pathToMyFolder);
-        if(!file.exists()){
-            file.mkdir();
-        }
+    public void saveToFile() throws JSONException, IOException {
         JSONObject jsonStorage = new JSONObject();
         jsonStorage.put("Name", name);
         jsonStorage.put( "CurrentDatabase", currentDatabase != null ? currentDatabase.getName() : "null");
@@ -122,12 +117,26 @@ public class Storage {
             jsonDatabases.put(database.getName());
         }
         jsonStorage.put("DatabaseNames", jsonDatabases);
-        try(Writer writer = new FileWriter(pathToMyFolder + "/" + name + ".json")){
-            Gson gson = new GsonBuilder().create();
-            gson.toJson(jsonStorage, writer);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
+        ResourceManager resourceManager = new ResourceManager("res/Storages/", name);
+        resourceManager.saveJSONToResource(jsonStorage);
+    }
+
+    private void addNameOfStorageToList() throws IOException {
+        File file = new File("res/storageNames.txt");
+        Scanner scanner = new Scanner(file);
+        StringBuilder toSave = new StringBuilder();
+        String tmp;
+        while(scanner.hasNextLine()){
+            tmp = scanner.nextLine();
+            if(name.equalsIgnoreCase(tmp)){
+                return;
+            }
+            toSave.append(tmp).append("\n");
+        }
+        toSave.append(name);
+        Writer fileWriter = new FileWriter(file);
+        fileWriter.write(toSave.toString());
+        fileWriter.close();
     }
 }

@@ -37,6 +37,39 @@ public class Record {
         );
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof Record){
+            Record _record = new Record((Record) obj);
+
+            if(values.size() != ((Record) obj).values.size()){
+                return false;
+            }
+
+            for(Map.Entry<String, Tuple> entry : values.entrySet()){
+                if(!_record.getValues().containsKey(entry.getKey())){
+                    return false;
+                }
+                if(!_record.getValues().containsValue(entry.getValue())){
+                    return false;
+                }
+            }
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        int hashcode = 0;
+        for(Map.Entry<String, Tuple> entry : values.entrySet()){
+            hashcode += entry.getValue().hashCode();
+            hashcode += entry.getKey().hashCode();
+        }
+        return hashcode;
+    }
+
     public Record getRecordWithOnlySpecifiedColumns(List<String> whichColumns){
         Map<String, Tuple> newValues = new HashMap<>();
         for(Map.Entry entry : values.entrySet()){
@@ -79,5 +112,26 @@ public class Record {
         }else{
             return false;
         }
+    }
+
+    public boolean meetConditions(List<Condition> conditions) {
+        for(Condition condition : conditions){
+            for(Map.Entry entry : values.entrySet()){
+                String columnName = (String) entry.getKey();
+                Tuple tuple = (Tuple) entry.getValue();
+                if(columnName.equalsIgnoreCase(condition.getColumnName())){
+                    if(tuple.equals(condition.getTuple())){
+                        if( condition.getConnector() == null || condition.getConnector().equalsIgnoreCase("OR")){
+                            return true;
+                        }
+                    }else{
+                        if(condition.getConnector() == null || condition.getConnector().equalsIgnoreCase("AND")){
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

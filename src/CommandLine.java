@@ -19,46 +19,66 @@ public class CommandLine {
     private String login;
     private String password;
     private boolean newStorageCreated;
-    private final String currentPath = System.getProperty("user.dir");
     private List<String> storageNames;
     private static CommandLine commandLine;
 
-    public static void main(String[] args) throws JSONException, UnknownTypeException, InvalidKeyWordException, IncorrectSyntaxException, BadQueryTypeException {
+    public static void main(String[] args){
         Console console = System.console();
         Scanner scanner = new Scanner(System.in);
-        init(args);
-
-        if(commandLine.password == null && !commandLine.newStorageCreated){
-            char passwordArray[] = console.readPassword("Password: ");
-            console.printf("Password entered was: %s%n", new String(passwordArray));
+        try {
+            init(args);
+        } catch (NoArgumentsException e) {
+            e.printStackTrace();
         }
 
-        //check if password is OK
-
-        int counter = 0;
-        List<String> command = new ArrayList<>();
-        while(true){
-            counter++;
-            System.out.print(counter + ">");
-            String str = scanner.nextLine();
-            if(!str.matches("\\s*[Gg][Oo]\\s*")){
-                command.add(str);
-            }else{
-                StringBuilder sB = new StringBuilder();
-                for(String s : command){
-                    sB.append(s).append(" ");
-                }
-                JSONObject jsonQuery = new JSONObject(Parser.parseSQLtoJSON(sB.toString()));
-                Query query = QueryFactory.getInstance().getQuery(jsonQuery);
-                Response response = commandLine.storage.executeQuery(query);
-                System.out.println(response.getMessage());
-                counter = 0;
-                command.clear();
+        if(commandLine.password == null && !commandLine.newStorageCreated){
+                char passwordArray[] = console.readPassword("Password: ");
+                console.printf("Password entered was: %s%n", new String(passwordArray));
             }
+
+            //check if password is OK
+
+            int counter = 0;
+            List<String> command = new ArrayList<>();
+            while(true) {
+                    counter++;
+                    System.out.print(counter + ">");
+                    String str = scanner.nextLine();
+                    if (!str.matches("\\s*[Gg][Oo]\\s*")) {
+                        command.add(str);
+                    }else {
+                        StringBuilder sB = new StringBuilder();
+                        for (String s : command) {
+                            sB.append(s).append(" ");
+                        }
+                        try {
+                        counter = 0;
+                        command.clear();
+                        JSONObject jsonQuery = Parser.parseSQLtoJSON(sB.toString());
+                        Query query = QueryFactory.getInstance().getQuery(jsonQuery);
+                        Response response = commandLine.storage.executeQuery(query);
+                        System.out.println(response.getMessage());
+                        } catch (IncorrectSyntaxException e) {
+                            e.printStackTrace();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        } catch (InvalidKeyWordException e) {
+                            e.printStackTrace();
+                        } catch (BadQueryTypeException e) {
+                            e.printStackTrace();
+                        } catch (UnknownTypeException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
         }
     }
 
-    private static void init(String[] args){
+    private static void init(String[] args) throws NoArgumentsException {
+        if(args.length < 2){
+            throw new NoArgumentsException();
+        }
         commandLine = new CommandLine();
         try {
             commandLine.loadListOfStorages();
@@ -73,15 +93,24 @@ public class CommandLine {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (StorageAlreadyExistsException e) {
+            e.printStackTrace();
         }
     }
 
     private void loadListOfStorages() throws IOException {
-        storageNames = Files.readAllLines(Paths.get(currentPath + "/" + "storageNames.txt"), StandardCharsets.UTF_8);
+        File file = new File("res/storageNames.txt");
+        if(!file.exists()){
+            if(!file.getParentFile().exists()){
+                file.getParentFile().mkdir();
+            }
+            file.createNewFile();
+        }
+        storageNames = Files.readAllLines(Paths.get("res/storageNames.txt"), StandardCharsets.UTF_8);
     }
 
-    private void handleArgument(String arg) throws InvalidArgumentException, FileNotFoundException, JSONException {
-        Pattern pattern = Pattern.compile("\\s*-(\\S)\\s(\\S+)");
+    private void handleArgument(String arg) throws InvalidArgumentException, IOException, JSONException, StorageAlreadyExistsException {
+        Pattern pattern = Pattern.compile("\\s*-(\\S)\\s+(\\S+)\\s*");
         Matcher matcher = pattern.matcher(arg);
         if(matcher.find() && matcher.matches()){
             switch (matcher.group(1)){
@@ -120,20 +149,23 @@ public class CommandLine {
     private void inlineCommand(String command) {
     }
 
-    private void createStorage(String storageName) throws JSONException {
-        File file = new File(currentPath + "/Storages");
-        if(file.exists()){
-            file.mkdir();
+    private void createStorage(String storageName) throws JSONException, IOException, StorageAlreadyExistsException {
+        File file = new File("res/Storages/" + storageName + ".json");
+        if(!file.exists()){
+            if(!file.getParentFile().exists()){
+                file.getParentFile().mkdir();
+            }
+            file.createNewFile();
+            storage = new Storage(storageName);
+        }else{
+            throw new StorageAlreadyExistsException();
         }
-
-        Storage storage = new Storage(storageName);
-        storage.saveToFile();
     }
 
-    private void loadStorage(String _storageName) throws FileNotFoundException, JSONException {
+    private void loadStorage(String _storageName) throws IOException, JSONException {
         for(String storageName : storageNames){
             if(storageName.equalsIgnoreCase(_storageName)){
-                File file = new File(currentPath + "/" + "Storages" + "/" + storageName + ".json");
+                File file = new File("res/Storages/" + storageName + ".json");
                 Scanner scanner = new Scanner(file);
                 scanner.useDelimiter("\\Z");
                 JSONObject jsonStorage = new JSONObject(scanner.next());

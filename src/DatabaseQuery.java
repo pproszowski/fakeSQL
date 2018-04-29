@@ -4,6 +4,8 @@ import com.powder.Exception.TableNotFoundException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+
 public class DatabaseQuery extends Query{
     private JSONObject query;
 
@@ -12,7 +14,7 @@ public class DatabaseQuery extends Query{
     }
 
     @Override
-    public Response execute(Storage storage) throws JSONException {
+    public Response execute(Storage storage) throws JSONException, IOException {
         Response response = new Response();
         try {
             String type = query.getString("Operation");
@@ -21,6 +23,7 @@ public class DatabaseQuery extends Query{
                 case "addtable":
                     Table table = new Table(query.getJSONObject("Table"));
                     database.addTable(table);
+                    table.saveToFile();
                     response.setMessage("Table " + table.getName() + " has been added");
                     break;
                 case "deletetable":

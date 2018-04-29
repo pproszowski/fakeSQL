@@ -1,19 +1,14 @@
-import com.powder.Exception.UnknownTypeException;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 public class Tuple<T> {
     private T value;
-    private String type;
+    private String typeName;
 
     public Tuple(T _value) {
         value = _value;
-        type = Type.determineType(String.valueOf(value));
+        typeName = Type.determineType(String.valueOf(value));
     }
 
-    public String getType() {
-        return type;
+    public String getTypeName() {
+        return typeName;
     }
 
     public T getValue(){
@@ -22,7 +17,28 @@ public class Tuple<T> {
 
 
     @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof Tuple) {
+            if (value instanceof String) {
+                String one = (String) this.value;
+                String two = ((Tuple) obj).value.toString();
+                return one.equalsIgnoreCase(two);
+            }
+        }
+        if(this.value.equals(((Tuple) obj).getValue())){
+            return this.typeName.equalsIgnoreCase(((Tuple) obj).getTypeName());
+        }else{
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return value.hashCode() * typeName.hashCode();
+    }
+
+    @Override
     public String toString() {
-        return value.toString();
+        return "(TUPLE): {" + value.toString() + " : " + typeName + "}";
     }
 }

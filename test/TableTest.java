@@ -2,26 +2,27 @@ import com.powder.Exception.*;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class TableTest {
-    Column column = new Column("imie", "string");
-    Column column1 = new Column("nazwisko", "string");
-    Column column2 = new Column("stanowisko", "string");
-    Column column3 = new Column("wiek", "number");
+    Column firstName = new Column("imie", "string");
+    Column surname = new Column("nazwisko", "string");
+    Column profession = new Column("stanowisko", "string");
+    Column age = new Column("wiek", "number");
     List<Column> columns = new ArrayList<>();
     {
-        columns.add(column);
-        columns.add(column1);
-        columns.add(column2);
-        columns.add(column3);
+        columns.add(firstName);
+        columns.add(surname);
+        columns.add(profession);
+        columns.add(age);
     }
     Map<String, Tuple> data = new HashMap<>();
     {
         data.put("imie", new Tuple<>("Piotr"));
-        data.put("Nazwisko", new Tuple<>("Piotr"));
+        data.put("Nazwisko", new Tuple<>("Proszowski"));
         data.put("stanowisko", new Tuple<>("Programista Java"));
         data.put("wiek", new Tuple<>(21));
     }
@@ -36,57 +37,83 @@ class TableTest {
     Record anotherRecord = new Record(data);
 
     @Test
-    void duplicateColumnNamesIsImpossible(){
+    void checkIfTwoTheSameTablesAreEqual() throws DuplicateColumnsException, JSONException, IOException, ColumnNotFoundException, DifferentTypesException, UnknownTypeException {
+        Table table = new Table("test", columns);
+        table.insert(record);
+        table.insert(anotherRecord);
+        assertEquals(table, table);
+    }
+
+    @Test
+    void insertionOfColumnWithTheSameNamesToOneTableCauseException() throws DuplicateColumnsException {
         Column _column = new Column("imie", "string");
-        try {
-            Table test = new Table("test", Arrays.asList(_column, _column));
-            fail("Exception should be thrown...");
-        } catch (DuplicateColumnsException e) {
-            e.getMessage();
-        }
-    }
+        new Table("test", Arrays.asList(_column, _column));
+        fail("Exception should be thrown...");
+}
 
     @Test
-    void selectAllReturnsExpectedTable() throws UnknownTypeException {
-        try {
-            Table table = new Table("testTable", columns);
-            table.insert(record);
-            table.insert(anotherRecord);
-            assertEquals(table, table.selectAll());
-        } catch (DuplicateColumnsException | ColumnNotFoundException | DifferentTypesException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
+    void selectAllReturnsExpectedTable() throws UnknownTypeException, IOException, DuplicateColumnsException, ColumnNotFoundException, DifferentTypesException, JSONException {
+        Table table = new Table("testTable", columns);
+        table.insert(record);
+        table.insert(anotherRecord);
+        assertEquals(table, table.selectAll());
+}
 
     @Test
-    void selectFewColumnsReturnsExpectedTable() throws UnknownTypeException {
-        try {
-            Table table = new Table("testTable", columns);
-            table.insert(record);
-            table.insert(anotherRecord);
-            Table selectedTable = table.select(Arrays.asList("Imie", "Nazwisko"));
-            Column name = new Column("Imie", "String");
-            Column surName = new Column("Nazwisko", "String");
-            Table anotherTable = new Table("testTable", Arrays.asList(name, surName));
-            Record newRecord = new Record(record, Arrays.asList("Imie", "Nazwisko"));
-            Record anotherNewRecord = new Record(anotherRecord, Arrays.asList("Imie", "Nazwisko"));
-            anotherTable.insert(Arrays.asList(newRecord, anotherNewRecord));
+    void selectFewColumnsReturnsExpectedTable() throws UnknownTypeException, IOException, ColumnNotFoundException, DifferentTypesException, JSONException, DuplicateColumnsException {
+        Table table = new Table("testTable", columns);
+        table.insert(record);
+        table.insert(anotherRecord);
+        Table selectedTable = table.select(Arrays.asList("Imie", "Nazwisko"));
 
-            assertEquals(selectedTable.toString(), anotherTable.toString());
-        } catch (DuplicateColumnsException | ColumnNotFoundException | DifferentTypesException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
+        Table anotherTable = new Table("testTable", Arrays.asList(firstName, surname));
+        anotherTable.insert(new Record(record, Arrays.asList("Imie", "Nazwisko")));
+        anotherTable.insert(new Record(anotherRecord, Arrays.asList("Imie", "Nazwisko")));
+
+        assertEquals(anotherTable, selectedTable);
+}
 
     @Test
-    void testingVisualisation() throws DuplicateColumnsException, DifferentTypesException, ColumnNotFoundException, InvalidTypeException, UnknownTypeException, JSONException {
+    void testingVisualisation() throws DuplicateColumnsException, DifferentTypesException, ColumnNotFoundException, UnknownTypeException, JSONException, IOException {
         Table table = new Table("test", columns);
         table.insert(record);
         table.insert(anotherRecord);
         System.out.println(table.show());
     }
+
+    @Test
+    void ifRecordHasEmptyValueForSomeColumnsTheseColumnsShouldBeNull() throws DuplicateColumnsException, DifferentTypesException, ColumnNotFoundException {
+        Table table = new Table("testTable", columns);
+        Map<String, Tuple> nameAndSurname = new HashMap<>();
+        nameAndSurname.put("Imie", new Tuple("Piotr"));
+        nameAndSurname.put("Nazwisko", new Tuple("Proszowski"));
+        table.insert(new Record(nameAndSurname));
+
+        Table anotherTable = new Table("testTable", columns);
+        Map<String, Tuple> dataWithNulls = new HashMap<>();
+        dataWithNulls.put("Imie", new Tuple("Piotr"));
+        dataWithNulls.put("Nazwisko", new Tuple("Proszowski"));
+        dataWithNulls.put("stanowisko", new Tuple("null"));
+        dataWithNulls.put("wiek", new Tuple("null"));
+        anotherTable.insert(new Record(dataWithNulls));
+
+        assertEquals(table, anotherTable);
+    }
+
+    @Test
+    void deleteWithWhereClause() throws DifferentTypesException, ColumnNotFoundException, DuplicateColumnsException, IOException, JSONException {
+        Table table = new Table("test", columns);
+        table.insert(record);
+
+        Table anotherTable = new Table("test", columns);
+        anotherTable.insert(record);
+        anotherTable.insert(anotherRecord);
+        Condition condition = new Condition("imie", new Tuple("AnDrzej"), null);
+        assertEquals(1,anotherTable.delete(Collections.singletonList(condition)));
+        assertEquals(table, anotherTable);
+    }
+
+
+
 }
+

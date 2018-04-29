@@ -1,21 +1,15 @@
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.powder.Exception.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
 import java.util.*;
 
 public class Table {
     private String name;
     private List<Column> columns;
     private List<Record> records;
-    private static String path = System.getProperty("user.dir") + "Storages/Databases/Tables";
 
     public Table(Table _table) throws DuplicateColumnsException {
         this(_table.name, _table.columns, _table.records);
@@ -37,7 +31,6 @@ public class Table {
         }
         this.columns = new ArrayList<>(columns);
         this.records = new ArrayList<>(_records);
-        path += name + ".json";
     }
 
     public Table(JSONObject jsonTable) {
@@ -55,10 +48,11 @@ public class Table {
             for (int i = 0; i < _records.length(); i++) {
                 records.add(new Record(_records.getJSONObject(i)));
             }
+            jsonTable.put("Columns", _columns);
+            jsonTable.put("Records", _records);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        path += name + ".json";
     }
 
     public Table selectAll() throws DuplicateColumnsException {
@@ -86,25 +80,18 @@ public class Table {
         return new Table(name, _columns, newRecords);
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if(obj instanceof Table){
-            Table table = (Table) obj;
-            return name.equals(table.name);
-        }else{
-            return false;
-        }
-    }
 
-    public void insert(Record record) throws DifferentTypesException, ColumnNotFoundException, UnknownTypeException, JSONException {
+    public void insert(Record record) throws DifferentTypesException, ColumnNotFoundException {
 
         Record copy = new Record(record);
         for(Map.Entry<String, Tuple> entry : record.getValues().entrySet()){
            for(Column column : columns){
                if(column.getName().equalsIgnoreCase(entry.getKey())){
                    Tuple tuple = entry.getValue();
-                   if(!column.getType().getName().equals(tuple.getType())){
-                       throw new DifferentTypesException();
+                   if(!column.getType().getName().equalsIgnoreCase(tuple.getTypeName())){
+                       if(! (tuple.getValue() instanceof String && tuple.getValue().equals("null"))){
+                           throw new DifferentTypesException();
+                       }
                    }
                    if(tuple.toString().length() > column.getWidth()){
                        column.expandWidth(tuple.toString().length() + 2);
@@ -124,8 +111,6 @@ public class Table {
         }else{
             throw new ColumnNotFoundException();
         }
-
-        saveToFile();
     }
 
     public void insert(List<Record> _records) throws DifferentTypesException, ColumnNotFoundException {
@@ -139,24 +124,40 @@ public class Table {
             this.records = copy.records;
         } catch (DuplicateColumnsException e) {
             //impossible to happen
-        } catch (UnknownTypeException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
     }
 
-    public int delete(Condition condition) throws JSONException {
+    public int delete(List<Condition> conditions) throws JSONException, IOException {
+        List<Record> recordsToRemove = new ArrayList<>();
         int sizeBefore = records.size();
-        if(condition.isEmpty()){
+        if(conditions.isEmpty()){
             records.clear();
+        }else{
+           for(Record record : records){
+                if(record.meetConditions(conditions)){
+                    recordsToRemove.add(record);
+                }
+           }
+
+           records.removeAll(recordsToRemove);
         }
 
-        saveToFile();
         return sizeBefore - records.size();
     }
 
-    public int update(Condition condition, Map<String, Tuple> newValues) throws JSONException {
+    public Table where(List<Condition> conditions) throws DuplicateColumnsException, DifferentTypesException, ColumnNotFoundException {
+        Table table = new Table(this.name, this.columns);
+        List<Record> recordsToInsert = new ArrayList<>();
+        for(Record record : records){
+            if(record.meetConditions(conditions)){
+                recordsToInsert.add(record);
+            }
+        }
+        table.insert(recordsToInsert);
+        return table;
+    }
+
+    public int update(Condition condition, Map<String, Tuple> newValues) throws JSONException, IOException {
         int howMany = 0;
         if(condition.isEmpty()){
             for(Map.Entry entry : newValues.entrySet()){
@@ -181,13 +182,39 @@ public class Table {
         sB.append(name);
         sB.append("\nColumns:\n");
         for(Column column : columns){
-            sB.append(column.getName()).append("  ");
+            sB.append(column.toString()).append("\n");
         }
+        sB.append("\nRecords:\n");
         for(Record record : records){
-            sB.append(record.toString()).append(" ").append("\n");
+            sB.append(record.toString()).append("\n");
         }
 
         return sB.toString();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof Table){
+            Table table = (Table) obj;
+            return name.equals(table.name)
+                    && this.records.containsAll(table.records)
+                    && this.columns.containsAll(table.columns);
+        }else{
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        int hashcode = 0;
+        for(Column column : columns){
+            hashcode += column.hashCode();
+        }
+        for(Record record : records){
+            hashcode += record.hashCode();
+        }
+        hashcode += name.hashCode();
+        return hashcode;
     }
 
     public String show() {
@@ -235,11 +262,7 @@ public class Table {
         return top.toString() + bottom.toString() + mid.toString() + bottom.toString();
     }
 
-    private void saveToFile() throws JSONException {
-        File file = new File(path);
-        if(!file.exists()){
-            file.mkdir();
-        }
+    public void saveToFile() throws JSONException, IOException {
         JSONObject jsonTable= new JSONObject();
         jsonTable.put("Name", name);
         JSONArray jsonColumns = new JSONArray();
@@ -257,16 +280,14 @@ public class Table {
         for(Record record : records){
             jsonRecords.put(record.getValues());
         }
+
         jsonTable.put("Columns", jsonColumns);
         jsonTable.put("Records", jsonRecords);
 
-        try(Writer writer = new FileWriter(path + name + ".json")){
-            Gson gson = new GsonBuilder().create();
-            gson.toJson(jsonTable, writer);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ResourceManager resourceManager = new ResourceManager("res/Storages/Databases/Tables/", name);
+        resourceManager.saveJSONToResource(jsonTable);
     }
+
 }
 
 

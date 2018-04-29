@@ -1,5 +1,3 @@
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.powder.Exception.TableAlreadyExistsException;
 import com.powder.Exception.TableNotFoundException;
 import org.json.JSONArray;
@@ -9,20 +7,17 @@ import org.json.JSONObject;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 public class Database {
     private List<Table> tables;
     private String name;
-    private static final String pathToMyFolder = System.getProperty("user.dir") + "Storages/Databases";
-    private static final String pathToTables= System.getProperty("user.dir") + "Storages/Databases/Tables";
 
     public Database(String _name){
         name = _name;
         tables = new ArrayList<>();
     }
 
-    public Database(JSONObject database) throws JSONException, FileNotFoundException {
+    public Database(JSONObject database) throws JSONException, IOException {
         name = database.getString("Name");
         tables = new ArrayList<>();
         JSONArray jsonTables = database.getJSONArray("Tables");
@@ -31,16 +26,14 @@ public class Database {
             tableNames.add(jsonTables.getString(i));
         }
         for(String tableName : tableNames){
-            File file = new File(pathToTables + "/" + tableName + ".json");
-            Scanner scanner = new Scanner(file);
-            scanner.useDelimiter("\\Z");
-            JSONObject jsonTable = new JSONObject(scanner.next());
+            ResourceManager resourceManager = new ResourceManager("res/Storages/Databases/Tables/", tableName);
+            JSONObject jsonTable = new JSONObject(resourceManager.readFromResource());
             Table table = new Table(jsonTable);
             tables.add(table);
         }
     }
 
-    public void addTable(Table _table) throws TableAlreadyExistsException, JSONException {
+    public void addTable(Table _table) throws TableAlreadyExistsException, JSONException, IOException {
         for(Table table : tables){
             if(table.getName().equals(_table.getName())){
                 throw new TableAlreadyExistsException(table.getName() ,this.getName());
@@ -50,7 +43,7 @@ public class Database {
         saveToFile();
     }
 
-    public void removeTable(String tableName) throws TableNotFoundException, JSONException {
+    public void removeTable(String tableName) throws TableNotFoundException, JSONException, IOException {
         Table tableToDelete = null;
         for(Table table : tables){
             if(table.getName().equals(tableName)){
@@ -84,11 +77,7 @@ public class Database {
         return name;
     }
 
-    private void saveToFile() throws JSONException {
-        File file = new File(pathToMyFolder);
-        if(!file.exists()){
-            file.mkdir();
-        }
+    public void saveToFile() throws JSONException, IOException {
         JSONObject jsonDatabase = new JSONObject();
         jsonDatabase.put("Name", name);
         JSONArray jsonTableNames = new JSONArray();
@@ -96,12 +85,9 @@ public class Database {
             jsonTableNames.put(table.getName());
         }
         jsonDatabase.put("Tables", jsonTableNames);
+        ResourceManager resourceManager = new ResourceManager("res/Storages/Databases/", name);
+        resourceManager.saveJSONToResource(jsonDatabase);
 
-        try(Writer writer = new FileWriter(pathToMyFolder + "/" + name + ".json")){
-            Gson gson = new GsonBuilder().create();
-            gson.toJson(jsonDatabase, writer);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
     }
 }

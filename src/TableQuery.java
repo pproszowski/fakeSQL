@@ -5,6 +5,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,10 +36,21 @@ public class TableQuery extends Query{
                         response.setMessage(table.select(columnNames).show());
                     break;
                 case "insert":
-                        table.insert(new Record(query.getJSONObject("Record")));
+                   table.insert(new Record(query.getJSONObject("Record")));
                     break;
                 case "delete":
-                    howMany = table.delete(new Condition(query.getJSONObject("Condition")));
+                    List<Condition> conditions = new ArrayList<>();
+                    JSONArray jsonArray = query.getJSONArray("Conditions");
+                    for(int i = 0; i < jsonArray.length(); i++){
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        String columnName = jsonObject.getString("ColumnName");
+                        Tuple tuple = new Tuple(jsonObject.get("Tuple"));
+                        String connector = jsonObject.getString("Connector");
+                        Condition condition = new Condition(columnName, tuple, connector);
+                        conditions.add(condition);
+                    }
+
+                    howMany = table.delete(conditions);
                     response.setMessage("(" + howMany + ") rows has been removed");
                     break;
                 case "update":
@@ -50,10 +62,12 @@ public class TableQuery extends Query{
                     break;
             }
             response.setValid(true);
-        } catch (CurrentDatabaseNotSetException | UnknownTypeException | DuplicateColumnsException | ColumnNotFoundException | DifferentTypesException | TableNotFoundException e) {
+        } catch (CurrentDatabaseNotSetException | DuplicateColumnsException | ColumnNotFoundException | DifferentTypesException | TableNotFoundException e) {
             response.setValid(false);
             response.setMessage(e.getMessage());
             return response;
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return response;
     }

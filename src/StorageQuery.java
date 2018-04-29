@@ -1,9 +1,11 @@
+import com.powder.Exception.CurrentDatabaseNotSetException;
 import com.powder.Exception.DatabaseAlreadyExistsException;
 import com.powder.Exception.DatabaseNotFoundException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class StorageQuery extends Query {
     private JSONObject query;
@@ -21,6 +23,7 @@ public class StorageQuery extends Query {
                 case "adddatabase":
                     Database database = new Database(query.getJSONObject("Database"));
                     storage.addDatabase(database);
+                    database.saveToFile();
                     break;
                 case "setcurrentdatabase":
                     String name = query.getString("Name");
@@ -39,6 +42,8 @@ public class StorageQuery extends Query {
             response.setMessage(e.getMessage());
             return response;
         } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
