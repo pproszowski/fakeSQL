@@ -59,7 +59,6 @@ public class Storage {
             currentDatabase = _database;
         }
         databases.add(_database);
-        saveToFile();
     }
 
     void deleteDatabase(String whichDatabase) throws DatabaseNotFoundException, JSONException, IOException {
@@ -75,7 +74,6 @@ public class Storage {
             if(databases.isEmpty()){
                 currentDatabase = null;
             }
-            saveToFile();
         }else{
             throw new DatabaseNotFoundException();
         }
@@ -93,7 +91,6 @@ public class Storage {
         for(Database database : databases){
             if(database.getName().equals(databaseName)){
                 currentDatabase = database;
-                saveToFile();
                 return;
             }
         }
