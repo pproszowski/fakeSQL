@@ -77,9 +77,21 @@ public class Table {
                 }
             }
         }
+
         return new Table(name, _columns, newRecords);
     }
 
+    public Table where(List<Condition> conditions) throws DuplicateColumnsException, DifferentTypesException, ColumnNotFoundException {
+        List<Record> _records = new ArrayList<>();
+        for(Record record : records){
+            if(record.meetConditions(conditions)){
+                _records.add(record);
+            }
+        }
+        Table toReturn = new Table(this.name, this.columns);
+        toReturn.insert(_records);
+        return toReturn;
+    }
 
     public void insert(Record record) throws DifferentTypesException, ColumnNotFoundException {
 
@@ -145,30 +157,29 @@ public class Table {
         return sizeBefore - records.size();
     }
 
-    public Table where(List<Condition> conditions) throws DuplicateColumnsException, DifferentTypesException, ColumnNotFoundException {
-        Table table = new Table(this.name, this.columns);
-        List<Record> recordsToInsert = new ArrayList<>();
-        for(Record record : records){
-            if(record.meetConditions(conditions)){
-                recordsToInsert.add(record);
-            }
-        }
-        table.insert(recordsToInsert);
-        return table;
-    }
-
-    public int update(Condition condition, Map<String, Tuple> newValues) throws JSONException, IOException {
+    public int update(List<Condition> conditions, Map<String, Tuple> newValues) throws JSONException, IOException {
         int howMany = 0;
-        if(condition.isEmpty()){
-            for(Map.Entry entry : newValues.entrySet()){
-                for(Record record : records){
-                    if(record.update((String)entry.getKey(), (Tuple)entry.getValue())){
-                        howMany++;
-                    }
+        List<Record> recordsToUpdate;
+        if(conditions.isEmpty()){
+            recordsToUpdate = records;
+        }else{
+            recordsToUpdate = new ArrayList<>();
+            for(Record record : records){
+                if(record.meetConditions(conditions)){
+                    recordsToUpdate.add(record);
                 }
             }
         }
-        saveToFile();
+
+
+        for(Map.Entry entry : newValues.entrySet()){
+            for(Record record : recordsToUpdate){
+                if(record.update((String)entry.getKey(), (Tuple)entry.getValue())){
+                    howMany++;
+                }
+            }
+        }
+
         return howMany;
     }
 

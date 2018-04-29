@@ -26,6 +26,7 @@ public class TableQuery extends Query{
             Database database = storage.getCurrentDatabase();
             Table table = database.getTable(query.getString("Name"));
             int howMany;
+            List<Condition> conditions;
             switch(type.toLowerCase()){
                 case "select":
                         JSONArray columns = query.getJSONArray("ColumnNames");
@@ -39,17 +40,7 @@ public class TableQuery extends Query{
                    table.insert(new Record(query.getJSONObject("Record")));
                     break;
                 case "delete":
-                    List<Condition> conditions = new ArrayList<>();
-                    JSONArray jsonArray = query.getJSONArray("Conditions");
-                    for(int i = 0; i < jsonArray.length(); i++){
-                        JSONObject jsonObject = jsonArray.getJSONObject(i);
-                        String columnName = jsonObject.getString("ColumnName");
-                        Tuple tuple = new Tuple(jsonObject.get("Tuple"));
-                        String connector = jsonObject.getString("Connector");
-                        Condition condition = new Condition(columnName, tuple, connector);
-                        conditions.add(condition);
-                    }
-
+                    conditions = extractConditionsFromJSONArray(query.getJSONArray("Conditions"));
                     howMany = table.delete(conditions);
                     response.setMessage("(" + howMany + ") rows has been removed");
                     break;
@@ -57,7 +48,8 @@ public class TableQuery extends Query{
                     Map<String, Tuple> changes = new Gson().fromJson(
                             query.getJSONObject("Changes").toString(), new TypeToken<HashMap<String, Tuple>>(){}.getType()
                     );
-                    howMany = table.update(new Condition(query.getJSONObject("Condition")), changes);
+                    conditions = extractConditionsFromJSONArray(query.getJSONArray("Conditions"));
+                    howMany = table.update(conditions, changes);
                     response.setMessage("(" + howMany + ") records has been affected");
                     break;
             }
@@ -70,5 +62,18 @@ public class TableQuery extends Query{
             e.printStackTrace();
         }
         return response;
+    }
+
+    private List<Condition> extractConditionsFromJSONArray(JSONArray jsonConditions) throws JSONException {
+        List<Condition> _conditions = new ArrayList<>();
+        for(int i = 0; i < jsonConditions.length(); i++){
+            JSONObject jsonCondition = jsonConditions.getJSONObject(i);
+            String columnName = jsonCondition.getString("ColumnName");
+            Tuple tuple = new Tuple(jsonCondition.get("Tuple"));
+            String connector = jsonCondition.getString("Connector");
+            Condition condition = new Condition(columnName, tuple, connector);
+            _conditions.add(condition);
+        }
+        return _conditions;
     }
 }

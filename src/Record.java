@@ -105,7 +105,7 @@ public class Record {
     }
 
     public boolean update(String whichColumn, Tuple newValue){
-        if(values.get(whichColumn) != newValue){
+        if(!values.get(whichColumn).equals(newValue)){
             values.remove(whichColumn);
             values.put(whichColumn, newValue);
             return true;

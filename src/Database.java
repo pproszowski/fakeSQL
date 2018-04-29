@@ -40,7 +40,6 @@ public class Database {
             }
         }
         tables.add(_table);
-        saveToFile();
     }
 
     public void removeTable(String tableName) throws TableNotFoundException, JSONException, IOException {
@@ -53,7 +52,6 @@ public class Database {
 
         if(tableToDelete != null){
             tables.remove(tableToDelete);
-            saveToFile();
         }else{
             throw new TableNotFoundException(this.getName(), tableName);
         }

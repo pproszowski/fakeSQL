@@ -101,7 +101,7 @@ class TableTest {
     }
 
     @Test
-    void deleteWithWhereClause() throws DifferentTypesException, ColumnNotFoundException, DuplicateColumnsException, IOException, JSONException {
+    void deleteWithConditions() throws DifferentTypesException, ColumnNotFoundException, DuplicateColumnsException, IOException, JSONException {
         Table table = new Table("test", columns);
         table.insert(record);
 
@@ -113,6 +113,40 @@ class TableTest {
         assertEquals(table, anotherTable);
     }
 
+    @Test
+    void updateWithConditions() throws DuplicateColumnsException, DifferentTypesException, ColumnNotFoundException, IOException, JSONException {
+        Table table = new Table("test", columns);
+        table.insert(record);
+        table.insert(anotherRecord);
+
+        Map<String, Tuple> changes = new HashMap<>();
+        changes.put("Nazwisko", new Tuple("Kornicki"));
+
+        List<Condition> conditions = new ArrayList<>();
+        conditions.add(new Condition("Nazwisko", new Tuple("ProszowsKi"), null));
+
+        assertEquals(1, table.update(conditions, changes));
+        //table.update(conditions,changes) affects records which it change, which is good.
+        assertTrue("kornicki".equalsIgnoreCase(record.getValueFromColumn("nazwisko").getValue().toString()));
+
+
+    }
+
+    @Test
+    void selectWithWhere() throws DuplicateColumnsException, DifferentTypesException, ColumnNotFoundException {
+        Table table = new Table("testTable", columns);
+        table.insert(record);
+        table.insert(anotherRecord);
+
+        Condition condition = new Condition("Nazwisko", new Tuple("Proszowski"), null);
+        Table selectedTable = table.selectAll().where(Arrays.asList(condition));
+
+        Table anotherTable = new Table("testTable", Arrays.asList(firstName, surname));
+        anotherTable.insert(new Record(record, Arrays.asList("Imie", "Nazwisko")));
+
+        assertEquals(table, selectedTable);
+        
+    }
 
 
 }

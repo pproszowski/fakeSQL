@@ -4,9 +4,11 @@ import com.powder.Exception.TableNotFoundException;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Scanner;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -61,6 +63,17 @@ class DatabaseTest {
         } catch (TableNotFoundException tableNotFound) {
             tableNotFound.printStackTrace();
         }
+    }
+
+    @Test
+    void savingDatabaseWorksProperly() throws IOException, JSONException {
+        Database database = new Database("test");
+        database.saveToFile();
+        File file = new File("res/Storages/Databases/test.json");
+        Scanner scanner = new Scanner(file);
+        scanner.useDelimiter("\\Z");
+        assertEquals("{\"Tables\":[],\"Name\":\"test\"}", scanner.next());
+        file.delete();
     }
 
 }

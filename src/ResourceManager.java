@@ -23,12 +23,9 @@ public class ResourceManager {
     }
 
     public void saveJSONToResource(JSONObject json) throws IOException {
-        System.out.println("SAVING JSON: ");
-        System.out.println(json.toString());
         File file = new File(pathToDir);
         if(!file.exists()){
-            file.mkdir();
-            System.out.println(pathToDir + " created");
+            file.mkdirs();
         }
 
         Writer writer = null;
