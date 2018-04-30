@@ -24,10 +24,12 @@ public class DatabaseQuery extends Query{
                     Table table = new Table(query.getJSONObject("Table"));
                     database.addTable(table);
                     table.saveToFile();
+                    database.saveToFile();
                     response.setMessage("Table " + table.getName() + " has been added");
                     break;
-                case "deletetable":
+                case "droptable":
                     database.removeTable(query.getString("Name"));
+                    database.saveToFile();
                     break;
             }
             response.setValid(true);

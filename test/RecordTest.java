@@ -30,18 +30,18 @@ class RecordTest {
     void meetConditionsReturnTrueIfItDoesAndFalseIfNot(){
         Record record = new Record(data);
         List<Condition> conditions = new ArrayList<>();
-        Condition condition = new Condition("One", new Tuple(1), null);
+        Condition condition = new Condition("One", new Tuple(1), null, "=");
         conditions.add(condition);
         assertTrue(record.meetConditions(conditions));
 
         conditions.clear();
-        Condition otherCondition = new Condition("Two", new Tuple(2), "AND");
+        Condition otherCondition = new Condition("Two", new Tuple(2), "AND", "=");
         conditions.add(otherCondition);
         conditions.add(condition);
         assertTrue(record.meetConditions(conditions));
 
         conditions.clear();
-        Condition falseCondition = new Condition("Three", new Tuple(4), "AND");
+        Condition falseCondition = new Condition("Three", new Tuple(4), "AND", "=");
         conditions.add(falseCondition);
         conditions.add(otherCondition);
         conditions.add(condition);

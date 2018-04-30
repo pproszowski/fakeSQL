@@ -15,6 +15,9 @@ public class Column {
 
     public Column(JSONObject jsonObject) throws JSONException {
         this(jsonObject.getString("Name"), new Type(jsonObject.getJSONObject("Type")));
+        if(jsonObject.has("Width")){
+            width = jsonObject.getInt("Width");
+        }
     }
 
     @Override

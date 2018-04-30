@@ -48,7 +48,7 @@ public class Storage {
         addNameOfStorageToList();
     }
 
-    void addDatabase(Database _database) throws DatabaseAlreadyExistsException, JSONException, IOException {
+    public void addDatabase(Database _database) throws DatabaseAlreadyExistsException, JSONException, IOException {
         for(Database database : databases){
             if(database.getName().equals(_database.getName())){
                 throw new DatabaseAlreadyExistsException();
@@ -61,16 +61,17 @@ public class Storage {
         databases.add(_database);
     }
 
-    void deleteDatabase(String whichDatabase) throws DatabaseNotFoundException, JSONException, IOException {
+    public void deleteDatabase(String whichDatabase) throws DatabaseNotFoundException, JSONException, IOException {
         Database toDelete = null;
         for(Database database : databases){
             if(database.getName().equals(whichDatabase)){
                 toDelete = database;
             }
         }
-
         if(toDelete != null){
             databases.remove(toDelete);
+            toDelete.deleteTables();
+            toDelete.deleteFile();
             if(databases.isEmpty()){
                 currentDatabase = null;
             }
@@ -79,11 +80,17 @@ public class Storage {
         }
     }
 
+    public void deleteAllDatabases() throws IOException, JSONException, DatabaseNotFoundException {
+        for(Database database : databases){
+            deleteDatabase(database.getName());
+        }
+    }
+
     public Response executeQuery(Query query) throws JSONException, IOException {
         return query.execute(this);
     }
 
-    int howManyDatabases(){
+    public int howManyDatabases(){
         return databases.size();
     }
 
@@ -135,5 +142,10 @@ public class Storage {
         Writer fileWriter = new FileWriter(file);
         fileWriter.write(toSave.toString());
         fileWriter.close();
+    }
+
+    public void deleteFile(){
+        ResourceManager resourceManager = new ResourceManager("res/Storages/", name);
+        resourceManager.removeFile();
     }
 }

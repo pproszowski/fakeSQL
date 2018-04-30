@@ -55,20 +55,21 @@ public class Table {
         }
     }
 
-    public Table selectAll() throws DuplicateColumnsException {
+    public Table selectAll(List<Condition> conditions) throws DuplicateColumnsException, DifferentTypesException, ColumnNotFoundException {
         List<String> columnNames = new ArrayList<>();
         for(Column column : columns){
             columnNames.add(column.getName());
         }
-        return select(columnNames);
+        return select(columnNames, conditions);
     }
 
-    public Table select(List<String> whichColumns) throws DuplicateColumnsException {
+    public Table select(List<String> whichColumns, List<Condition> conditions) throws DuplicateColumnsException, DifferentTypesException, ColumnNotFoundException {
 
         List<Record> newRecords = new ArrayList<>();
         for(Record record : records){
             newRecords.add(record.getRecordWithOnlySpecifiedColumns(whichColumns));
         }
+
         List<Column> _columns = new ArrayList<>();
         for(String columnName : whichColumns){
             for(Column column : columns){
@@ -78,7 +79,16 @@ public class Table {
             }
         }
 
-        return new Table(name, _columns, newRecords);
+        Table table;
+        if(conditions.isEmpty()){
+            table = new Table(name, _columns, newRecords).where(conditions);
+            table.insert(newRecords);
+        }else{
+            table = new Table(name, _columns, newRecords);
+            table.insert(newRecords);
+        }
+
+        return table;
     }
 
     public Table where(List<Condition> conditions) throws DuplicateColumnsException, DifferentTypesException, ColumnNotFoundException {
@@ -100,13 +110,15 @@ public class Table {
            for(Column column : columns){
                if(column.getName().equalsIgnoreCase(entry.getKey())){
                    Tuple tuple = entry.getValue();
-                   if(!column.getType().getName().equalsIgnoreCase(tuple.getTypeName())){
-                       if(! (tuple.getValue() instanceof String && tuple.getValue().equals("null"))){
-                           throw new DifferentTypesException();
+                   if(!column.getType().getName().equalsIgnoreCase("string")){
+                       if(!column.getType().getName().equalsIgnoreCase(tuple.getTypeName())){
+                           if(! (tuple.getValue() instanceof String && tuple.getValue().equals("null"))){
+                               throw new DifferentTypesException();
+                           }
                        }
                    }
                    if(tuple.toString().length() > column.getWidth()){
-                       column.expandWidth(tuple.toString().length() + 2);
+                       column.expandWidth(tuple.getValue().toString().length() + 2);
                    }
                    copy.getValues().remove(entry.getKey());
                }
@@ -119,6 +131,7 @@ public class Table {
                     record.getValues().put(column.getName(), new Tuple<>("null"));
                 }
             }
+
             records.add(record);
         }else{
             throw new ColumnNotFoundException();
@@ -170,8 +183,6 @@ public class Table {
                 }
             }
         }
-
-
         for(Map.Entry entry : newValues.entrySet()){
             for(Record record : recordsToUpdate){
                 if(record.update((String)entry.getKey(), (Tuple)entry.getValue())){
@@ -258,8 +269,8 @@ public class Table {
                 for (Column column : columns) {
                     mid.append("|");
                     mid.append(" ");
-                    mid.append(record.getValueFromColumn(column.getName()));
-                    int howMuchSpaceLeft = column.getWidth() - record.getValueFromColumn(column.getName()).toString().length() + 1;
+                    mid.append(record.getValueFromColumn(column.getName()).getValue());
+                    int howMuchSpaceLeft = column.getWidth() - record.getValueFromColumn(column.getName()).getValue().toString().length() + 1;
                     for (int i = 0; i < howMuchSpaceLeft; i++) {
                         mid.append(" ");
                     }
@@ -280,6 +291,7 @@ public class Table {
         for(Column column : columns){
             JSONObject jsonColumn = new JSONObject();
             jsonColumn.put("Name", column.getName());
+            jsonColumn.put("Width", column.getWidth());
             JSONObject jsonType = new JSONObject();
             jsonType.put("Name", column.getType().getName());
             jsonType.put("Limit", column.getType().getLimit());
@@ -299,6 +311,10 @@ public class Table {
         resourceManager.saveJSONToResource(jsonTable);
     }
 
+    public void deleteFile(){
+        ResourceManager resourceManager = new ResourceManager("res/Storages/Databases/Tables/", name);
+        resourceManager.removeFile();
+    }
 }
 
 

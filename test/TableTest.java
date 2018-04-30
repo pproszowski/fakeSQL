@@ -56,7 +56,7 @@ class TableTest {
         Table table = new Table("testTable", columns);
         table.insert(record);
         table.insert(anotherRecord);
-        assertEquals(table, table.selectAll());
+        assertEquals(table, table.selectAll(Collections.emptyList()));
 }
 
     @Test
@@ -64,7 +64,7 @@ class TableTest {
         Table table = new Table("testTable", columns);
         table.insert(record);
         table.insert(anotherRecord);
-        Table selectedTable = table.select(Arrays.asList("Imie", "Nazwisko"));
+        Table selectedTable = table.select(Arrays.asList("Imie", "Nazwisko"), Collections.emptyList());
 
         Table anotherTable = new Table("testTable", Arrays.asList(firstName, surname));
         anotherTable.insert(new Record(record, Arrays.asList("Imie", "Nazwisko")));
@@ -108,7 +108,7 @@ class TableTest {
         Table anotherTable = new Table("test", columns);
         anotherTable.insert(record);
         anotherTable.insert(anotherRecord);
-        Condition condition = new Condition("imie", new Tuple("AnDrzej"), null);
+        Condition condition = new Condition("imie", new Tuple("AnDrzej"), null, "=");
         assertEquals(1,anotherTable.delete(Collections.singletonList(condition)));
         assertEquals(table, anotherTable);
     }
@@ -123,7 +123,7 @@ class TableTest {
         changes.put("Nazwisko", new Tuple("Kornicki"));
 
         List<Condition> conditions = new ArrayList<>();
-        conditions.add(new Condition("Nazwisko", new Tuple("ProszowsKi"), null));
+        conditions.add(new Condition("Nazwisko", new Tuple("ProszowsKi"), null, "="));
 
         assertEquals(1, table.update(conditions, changes));
         //table.update(conditions,changes) affects records which it change, which is good.
@@ -138,8 +138,8 @@ class TableTest {
         table.insert(record);
         table.insert(anotherRecord);
 
-        Condition condition = new Condition("Nazwisko", new Tuple("Proszowski"), null);
-        Table selectedTable = table.selectAll().where(Arrays.asList(condition));
+        Condition condition = new Condition("Nazwisko", new Tuple("Proszowski"), "null", "=");
+        Table selectedTable = table.selectAll(Collections.emptyList()).where(Arrays.asList(condition));
 
         Table anotherTable = new Table("testTable", Arrays.asList(firstName, surname));
         anotherTable.insert(new Record(record, Arrays.asList("Imie", "Nazwisko")));

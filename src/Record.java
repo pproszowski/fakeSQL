@@ -120,12 +120,12 @@ public class Record {
                 String columnName = (String) entry.getKey();
                 Tuple tuple = (Tuple) entry.getValue();
                 if(columnName.equalsIgnoreCase(condition.getColumnName())){
-                    if(tuple.equals(condition.getTuple())){
-                        if( condition.getConnector() == null || condition.getConnector().equalsIgnoreCase("OR")){
+                    if(condition.getResult(tuple)){
+                        if( condition.getConnector().equals("null") || condition.getConnector().equalsIgnoreCase("OR")){
                             return true;
                         }
                     }else{
-                        if(condition.getConnector() == null || condition.getConnector().equalsIgnoreCase("AND")){
+                        if(condition.getConnector().equals("null") || condition.getConnector().equalsIgnoreCase("AND")){
                             return false;
                         }
                     }

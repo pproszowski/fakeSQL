@@ -52,6 +52,7 @@ public class Database {
 
         if(tableToDelete != null){
             tables.remove(tableToDelete);
+            tableToDelete.deleteFile();
         }else{
             throw new TableNotFoundException(this.getName(), tableName);
         }
@@ -87,5 +88,17 @@ public class Database {
         resourceManager.saveJSONToResource(jsonDatabase);
 
 
+    }
+
+    public void deleteFile(){
+        ResourceManager resourceManager = new ResourceManager("res/Storages/Databases/", name);
+        resourceManager.removeFile();
+    }
+
+    public void deleteTables() {
+        for(Table table : tables){
+            ResourceManager resourceManager = new ResourceManager("res/Storage/Databases/Tables/", table.getName());
+            resourceManager.removeFile();
+        }
     }
 }

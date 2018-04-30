@@ -38,4 +38,11 @@ public class ResourceManager {
             }
         }
     }
+
+    public void removeFile(){
+        File file = new File(pathToDir + name + ".json");
+        if(file.exists()){
+            file.delete();
+        }
+    }
 }
